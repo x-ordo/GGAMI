@@ -1,0 +1,117 @@
+// Go 1.22 Native + MSSQL 표준 템플릿
+export const GO_MAIN_TEMPLATE = `package main
+
+import (
+	"database/sql"
+	"embed"
+	"fmt"
+	"html/template"
+	"log"
+	"net/http"
+	"os/exec"
+	"runtime"
+
+	_ "github.com/microsoft/go-mssqldb"
+    // @INJECT_IMPORTS
+)
+
+//go:embed templates/* assets/*
+var content embed.FS
+
+// [설정값] 빌더에 의해 치환될 변수들
+const (
+	DB_SERVER = "{{DB_SERVER}}"
+	DB_USER   = "{{DB_USER}}"
+	DB_PW     = "{{DB_PW}}"
+	DB_NAME   = "{{DB_NAME}}"
+	PORT      = ":8080"
+)
+
+var db *sql.DB
+
+// @INJECT_STRUCTS
+
+func main() {
+	// 1. MSSQL 연결 (윈도우 최적화)
+	connString := fmt.Sprintf("server=%s;user id=%s;password=%s;database=%s;",
+		DB_SERVER, DB_USER, DB_PW, DB_NAME)
+
+	var err error
+	db, err = sql.Open("sqlserver", connString)
+	if err != nil {
+		log.Fatal("❌ DB 연결 설정 실패:", err)
+	}
+	defer db.Close()
+
+	if err = db.Ping(); err != nil {
+		log.Println("⚠️ DB 연결 실패 (설정을 확인하세요):", err)
+	} else {
+		fmt.Println("✅ MSSQL 연결 성공!")
+	}
+
+	// 2. 템플릿 로드 (바이너리 내장)
+	tmpl, err := template.ParseFS(content, "templates/*.html")
+	if err != nil {
+		log.Fatal("❌ 템플릿 로드 실패:", err)
+	}
+
+	// 3. 라우터 (Go 1.22 Standard Mux)
+	mux := http.NewServeMux()
+
+	// [GET] 메인 페이지
+	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+		tmpl.ExecuteTemplate(w, "index.html", nil)
+	})
+
+	// [POST] 테스트 API (HTMX 연동용)
+	mux.HandleFunc("POST /api/check", func(w http.ResponseWriter, r *http.Request) {
+		// 간단한 서버 시간 확인 쿼리
+		var serverTime string
+		err := db.QueryRow("SELECT GETDATE()").Scan(&serverTime)
+		if err != nil {
+			fmt.Fprintf(w, "<div class='text-red-500'>DB 에러: %v</div>", err)
+			return
+		}
+		fmt.Fprintf(w, "<div class='text-green-600 font-bold'>DB 연결 정상! 서버 시간: %s</div>", serverTime)
+	})
+
+	// 정적 파일 서빙
+	mux.Handle("GET /assets/", http.FileServer(http.FS(content)))
+    
+    // @INJECT_ROUTES
+
+	// 4. 서버 시작 및 브라우저 자동 실행
+	fmt.Println("🚀 서버 시작: http://localhost" + PORT)
+	openBrowser("http://localhost" + PORT)
+	
+	err = http.ListenAndServe(PORT, mux)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+// 유틸리티: 브라우저 자동 열기
+func openBrowser(url string) {
+	var err error
+	switch runtime.GOOS {
+	case "windows":
+		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+	default:
+		// 개발용 (Mac/Linux는 생략 가능)
+	}
+	if err != nil {
+		log.Println("브라우저 열기 실패:", err)
+	}
+}
+
+// @INJECT_HANDLERS
+`;
+
+// go.mod 파일 템플릿 (의존성 관리)
+export const GO_MOD_TEMPLATE = `module {{PROJECT_NAME}}
+
+go 1.22
+
+require github.com/microsoft/go-mssqldb v1.6.0
+// @INJECT_REQUIRE
+`;
