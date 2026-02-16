@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white">
+    <div class="min-h-screen flex flex-col items-center justify-center p-8">
+        <div class="w-full max-w-4xl bg-gray-800 p-8 rounded-lg shadow-xl border border-gray-700 flex gap-8">
+            <!-- Left: Config Panel -->
+            <div class="flex-1 space-y-4">
+                <h1 class="text-3xl font-bold mb-6 text-yellow-400">Ggami Builder</h1>
+
+                <!-- Language Toggle -->
+                <div class="flex bg-gray-700 rounded p-1 mb-4">
+                    <button onclick="setLanguage('go')" id="btn-go"
+                        class="flex-1 px-3 py-1 rounded text-sm font-bold transition bg-yellow-500 text-black shadow">
+                        Go (Recommended)
+                    </button>
+                    <button onclick="setLanguage('node')" id="btn-node"
+                        class="flex-1 px-3 py-1 rounded text-sm font-bold transition text-gray-400 hover:text-white">
+                        Node.js
+                    </button>
+                </div>
+
+                <!-- Project Name -->
+                <div>
+                    <label class="block text-sm font-medium mb-1">Project Name</label>
+                    <input type="text" id="projectName" value="GgamiDemo"
+                        class="w-full bg-gray-700 p-2 rounded border border-gray-600 focus:border-yellow-400 focus:outline-none" />
+                </div>
+
+                <!-- DB Config -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">DB Server IP</label>
+                        <input type="text" id="dbServer" value="localhost"
+                            class="w-full bg-gray-700 p-2 rounded border border-gray-600" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">DB Name</label>
+                        <input type="text" id="dbName" value="MasterDB"
+                            class="w-full bg-gray-700 p-2 rounded border border-gray-600" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">DB User (ID)</label>
+                        <input type="text" id="dbUser" value="sa"
+                            class="w-full bg-gray-700 p-2 rounded border border-gray-600" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">DB Password (PW)</label>
+                        <input type="password" id="dbPw" value=""
+                            class="w-full bg-gray-700 p-2 rounded border border-gray-600" />
+                    </div>
+                </div>
+
+                <!-- Target Path -->
+                <div>
+                    <label class="block text-sm font-medium mb-1">Target Path</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="targetPath" readonly value="C:\Projects\GgamiDemo"
+                            class="flex-1 bg-gray-700 p-2 rounded border border-gray-600 text-gray-400" />
+                        <button onclick="selectDirectory()"
+                            class="bg-gray-600 px-3 rounded hover:bg-gray-500 cursor-pointer">
+                            Browse
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Module Selection Panel -->
+            <div class="w-80 border-l border-gray-700 pl-8">
+                <h2 class="text-xl font-bold mb-4 text-gray-300">Modules</h2>
+                <div id="module-list" class="space-y-3 h-[400px] overflow-y-auto pr-2">
+                    <!-- Populated by JS -->
+                </div>
+
+                <button onclick="generateProject()" id="btn-generate"
+                    class="w-full font-bold py-3 rounded mt-4 transition cursor-pointer bg-yellow-500 text-black hover:bg-yellow-400">
+                    Generate Go Project
+                </button>
+            </div>
+        </div>
+
+        <!-- Log Output -->
+        <div id="log-output" class="mt-6 w-full max-w-4xl p-4 bg-black rounded text-sm font-mono text-green-400 whitespace-pre-wrap hidden">
+        </div>
+    </div>
+
+    <script src="assets/js/generator.js"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ggami Builder</title>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        [data-view] { display: none; }
+        [data-view].active { display: block; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Top Navigation -->
+    <nav class="bg-gray-800 border-b border-gray-700 px-6 py-3 flex items-center gap-6">
+        <span class="text-xl font-bold text-yellow-400">Ggami Builder</span>
+        <div class="flex bg-gray-700 rounded p-1">
+            <button onclick="switchView('generator')" id="nav-generator"
+                class="px-4 py-1.5 rounded text-sm font-bold transition bg-yellow-500 text-black">
+                Code Generator
+            </button>
+            <button onclick="switchView('builder')" id="nav-builder"
+                class="px-4 py-1.5 rounded text-sm font-bold transition text-gray-400 hover:text-white">
+                Visual Builder
+            </button>
+        </div>
+    </nav>
+
+    <!-- Generator View -->
+    <div data-view="generator" class="active">
+        <iframe src="generator.html" class="w-full border-0" style="height: calc(100vh - 56px);"></iframe>
+    </div>
+
+    <!-- Builder View -->
+    <div data-view="builder">
+        <iframe src="builder.html" class="w-full border-0" style="height: calc(100vh - 56px);"></iframe>
+    </div>
+
+    <script>
+        function switchView(view) {
+            document.querySelectorAll('[data-view]').forEach(el => el.classList.remove('active'));
+            document.querySelector(`[data-view="${view}"]`).classList.add('active');
+
+            // Update nav button styles
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.className = 'px-4 py-1.5 rounded text-sm font-bold transition text-gray-400 hover:text-white';
+            });
+            const activeBtn = document.getElementById(`nav-${view}`);
+            activeBtn.className = 'px-4 py-1.5 rounded text-sm font-bold transition bg-yellow-500 text-black';
+        }
+    </script>
+</body>
+</html>
