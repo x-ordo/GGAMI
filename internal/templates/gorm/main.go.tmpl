@@ -1,0 +1,151 @@
+package main
+
+import (
+	"embed"
+	"fmt"
+	"html/template"
+	"log"
+	"net/http"
+	"os/exec"
+	"runtime"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"{{.ProjectName}}/handlers"
+	"{{.ProjectName}}/models"
+{{- if .HasRBAC}}
+	mw "{{.ProjectName}}/middleware"
+{{- end}}
+
+	"gorm.io/gorm"
+	"{{.Driver.GormDriver}}"
+)
+
+//go:embed templates/* assets/*
+var content embed.FS
+
+var (
+	db   *gorm.DB
+	tmpl *template.Template
+)
+
+func main() {
+	var err error
+
+	// DB 연결
+{{- if eq (printf "%s" .DBType) "sqlite"}}
+	dsn := fmt.Sprintf({{.Driver.DSNFormat}}, "{{.ProjectName}}")
+{{- else}}
+	dsn := fmt.Sprintf({{.Driver.DSNFormat}}, "{{.DBUser}}", "{{.DBPw}}", "{{.DBServer}}", "{{.DBName}}")
+{{- end}}
+	db, err = gorm.Open({{.Driver.DialFunc}}(dsn), &gorm.Config{})
+	if err != nil {
+		log.Fatal("❌ DB 연결 실패:", err)
+	}
+	fmt.Println("✅ DB 연결 성공!")
+
+	// AutoMigrate
+	err = db.AutoMigrate(
+{{- range .Models}}
+		&models.{{.Name}}{},
+{{- end}}
+{{- if .HasRBAC}}
+		&models.User{},
+{{- end}}
+	)
+	if err != nil {
+		log.Fatal("❌ 마이그레이션 실패:", err)
+	}
+	fmt.Println("✅ 테이블 마이그레이션 완료!")
+
+	// 템플릿 로드
+	tmpl, err = template.ParseFS(content, "templates/*.html")
+	if err != nil {
+		log.Fatal("❌ 템플릿 로드 실패:", err)
+	}
+
+	// Chi 라우터
+	r := chi.NewRouter()
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+
+	// 정적 파일
+	r.Handle("/assets/*", http.FileServer(http.FS(content)))
+
+	// 메인 페이지 → 첫 번째 모델 리스트로 리다이렉트
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+{{- if .Models}}
+		http.Redirect(w, r, "/{{(index .Models 0).NameSnake}}s/ui/list", http.StatusFound)
+{{- else}}
+		w.Write([]byte("Welcome to {{.ProjectName}}"))
+{{- end}}
+	})
+
+{{- if .HasRBAC}}
+	// Auth routes (public)
+	authHandler := handlers.NewAuthHandler(db, tmpl, "{{.RBAC.JWTSecret}}")
+	r.Get("/login", authHandler.LoginPage)
+	r.Post("/api/auth/login", authHandler.Login)
+	r.Post("/api/auth/register", authHandler.Register)
+	r.Get("/logout", authHandler.Logout)
+{{- end}}
+
+	// Model routes
+{{- range .Models}}
+	{
+		h := handlers.New{{.Name}}Handler(db, tmpl)
+{{- if $.HasRBAC}}
+		r.Route("/{{.NameSnake}}s", func(r chi.Router) {
+			r.Use(mw.JWTAuth("{{$.RBAC.JWTSecret}}"))
+			// UI routes
+			r.Get("/ui/list", h.ListPage)
+			r.Get("/ui/new", h.NewForm)
+			r.Get("/ui/{id}/edit", h.EditForm)
+			// API routes
+			r.Get("/", h.List)
+			r.Post("/", h.Create)
+			r.Get("/{id}", h.Get)
+			r.Put("/{id}", h.Update)
+			r.Post("/{id}/update", h.Update)
+			r.Delete("/{id}", h.Delete)
+			r.Post("/{id}/delete", h.Delete)
+		})
+{{- else}}
+		r.Route("/{{.NameSnake}}s", func(r chi.Router) {
+			// UI routes
+			r.Get("/ui/list", h.ListPage)
+			r.Get("/ui/new", h.NewForm)
+			r.Get("/ui/{id}/edit", h.EditForm)
+			// API routes
+			r.Get("/", h.List)
+			r.Post("/", h.Create)
+			r.Get("/{id}", h.Get)
+			r.Put("/{id}", h.Update)
+			r.Post("/{id}/update", h.Update)
+			r.Delete("/{id}", h.Delete)
+			r.Post("/{id}/delete", h.Delete)
+		})
+{{- end}}
+	}
+{{- end}}
+
+	// 서버 시작
+	addr := ":{{.Port}}"
+	fmt.Printf("🚀 서버 시작: http://localhost%s\n", addr)
+	openBrowser("http://localhost" + addr)
+
+	if err := http.ListenAndServe(addr, r); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func openBrowser(url string) {
+	switch runtime.GOOS {
+	case "windows":
+		exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+	case "darwin":
+		exec.Command("open", url).Start()
+	default:
+		exec.Command("xdg-open", url).Start()
+	}
+}

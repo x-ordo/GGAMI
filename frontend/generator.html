@@ -7,93 +7,174 @@
     <link rel="stylesheet" href="dist/output.css" />
 </head>
 <body class="bg-base-100 text-base-content">
-    <div class="min-h-screen flex flex-col items-center justify-center p-8">
-        <div class="card bg-base-200 shadow-xl w-full max-w-4xl">
-            <div class="card-body flex-row gap-8">
-                <!-- 왼쪽: 설정 패널 -->
-                <div class="flex-1 space-y-4">
-                    <div class="flex items-center gap-3 mb-6">
-                        <img src="assets/logo.png" alt="까미" class="w-10 h-10 rounded" />
-                        <h1 class="text-3xl font-bold text-warning">까미 빌더</h1>
-                    </div>
-
-                    <!-- 언어 선택 -->
-                    <div class="join w-full mb-4">
-                        <button onclick="setLanguage('go')" id="btn-go"
-                            class="join-item btn btn-sm flex-1 btn-warning">
-                            Go (권장)
-                        </button>
-                        <button onclick="setLanguage('node')" id="btn-node"
-                            class="join-item btn btn-sm flex-1 btn-ghost">
-                            Node.js
-                        </button>
-                    </div>
-
-                    <!-- 프로젝트 이름 -->
-                    <div class="form-control">
-                        <label class="label"><span class="label-text">프로젝트 이름</span></label>
-                        <input type="text" id="projectName" value="GgamiDemo"
-                            class="input input-bordered w-full" />
-                    </div>
-
-                    <!-- DB 설정 -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="form-control">
-                            <label class="label"><span class="label-text">DB 서버 IP</span></label>
-                            <input type="text" id="dbServer" value="localhost"
-                                class="input input-bordered w-full" />
-                        </div>
-                        <div class="form-control">
-                            <label class="label"><span class="label-text">DB 이름</span></label>
-                            <input type="text" id="dbName" value="MasterDB"
-                                class="input input-bordered w-full" />
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="form-control">
-                            <label class="label"><span class="label-text">DB 계정 (ID)</span></label>
-                            <input type="text" id="dbUser" value="sa"
-                                class="input input-bordered w-full" />
-                        </div>
-                        <div class="form-control">
-                            <label class="label"><span class="label-text">DB 암호 (PW)</span></label>
-                            <input type="password" id="dbPw" value=""
-                                class="input input-bordered w-full" />
-                        </div>
-                    </div>
-
-                    <!-- 저장 경로 -->
-                    <div class="form-control">
-                        <label class="label"><span class="label-text">저장 경로</span></label>
-                        <div class="join w-full">
-                            <input type="text" id="targetPath" readonly value="C:\Projects\GgamiDemo"
-                                class="join-item input input-bordered flex-1 text-base-content/50" />
-                            <button onclick="selectDirectory()"
-                                class="join-item btn btn-outline btn-sm">
-                                찾아보기
-                            </button>
-                        </div>
-                    </div>
+    <div class="min-h-screen flex flex-col items-center justify-start p-8">
+        <div class="card bg-base-200 shadow-xl w-full max-w-6xl">
+            <div class="card-body">
+                <div class="flex items-center gap-3 mb-4">
+                    <img src="assets/logo.png" alt="까미" class="w-10 h-10 rounded" />
+                    <h1 class="text-3xl font-bold text-warning">까미 빌더</h1>
                 </div>
 
-                <!-- 오른쪽: 모듈 선택 패널 -->
-                <div class="w-80 border-l border-base-300 pl-8">
-                    <h2 class="text-xl font-bold mb-4 text-base-content/70">모듈</h2>
-                    <div id="module-list" class="space-y-3 h-[400px] overflow-y-auto pr-2">
-                        <!-- JS로 채워짐 -->
+                <!-- 모드 선택: Simple vs GORM Full-Stack -->
+                <div class="join w-full mb-4">
+                    <button onclick="setMode('simple')" id="btn-simple"
+                        class="join-item btn btn-sm flex-1 btn-warning">
+                        Simple (기본)
+                    </button>
+                    <button onclick="setMode('gorm')" id="btn-gorm"
+                        class="join-item btn btn-sm flex-1 btn-ghost">
+                        GORM Full-Stack
+                    </button>
+                </div>
+
+                <div class="flex gap-8">
+                    <!-- 왼쪽: 설정 패널 -->
+                    <div class="flex-1 space-y-4">
+                        <!-- 언어 선택 (Simple 모드만) -->
+                        <div id="lang-selector">
+                            <div class="join w-full mb-4">
+                                <button onclick="setLanguage('go')" id="btn-go"
+                                    class="join-item btn btn-sm flex-1 btn-warning">
+                                    Go (권장)
+                                </button>
+                                <button onclick="setLanguage('node')" id="btn-node"
+                                    class="join-item btn btn-sm flex-1 btn-ghost">
+                                    Node.js
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- DB 타입 선택 (GORM 모드만) -->
+                        <div id="db-type-selector" class="hidden">
+                            <div class="form-control">
+                                <label class="label"><span class="label-text">데이터베이스</span></label>
+                                <select id="dbType" class="select select-bordered w-full" onchange="onDBTypeChange()">
+                                    <option value="sqlite">SQLite (파일 기반, 가장 간단)</option>
+                                    <option value="mssql">MSSQL (Microsoft SQL Server)</option>
+                                    <option value="postgres">PostgreSQL</option>
+                                    <option value="mysql">MySQL</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 프로젝트 이름 -->
+                        <div class="form-control">
+                            <label class="label"><span class="label-text">프로젝트 이름</span></label>
+                            <input type="text" id="projectName" value="GgamiDemo"
+                                class="input input-bordered w-full" />
+                        </div>
+
+                        <!-- DB 설정 (외부 DB용) -->
+                        <div id="db-connection-fields">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="form-control">
+                                    <label class="label"><span class="label-text">DB 서버 IP</span></label>
+                                    <input type="text" id="dbServer" value="localhost"
+                                        class="input input-bordered w-full" />
+                                </div>
+                                <div class="form-control">
+                                    <label class="label"><span class="label-text">DB 이름</span></label>
+                                    <input type="text" id="dbName" value="MasterDB"
+                                        class="input input-bordered w-full" />
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 mt-4">
+                                <div class="form-control">
+                                    <label class="label"><span class="label-text">DB 계정 (ID)</span></label>
+                                    <input type="text" id="dbUser" value="sa"
+                                        class="input input-bordered w-full" />
+                                </div>
+                                <div class="form-control">
+                                    <label class="label"><span class="label-text">DB 암호 (PW)</span></label>
+                                    <input type="password" id="dbPw" value=""
+                                        class="input input-bordered w-full" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 저장 경로 -->
+                        <div class="form-control">
+                            <label class="label"><span class="label-text">저장 경로</span></label>
+                            <div class="join w-full">
+                                <input type="text" id="targetPath" readonly value="C:\Projects\GgamiDemo"
+                                    class="join-item input input-bordered flex-1 text-base-content/50" />
+                                <button onclick="selectDirectory()"
+                                    class="join-item btn btn-outline btn-sm">
+                                    찾아보기
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- RBAC 설정 (GORM 모드만) -->
+                        <div id="rbac-section" class="hidden">
+                            <div class="divider text-sm">인증/권한 (RBAC)</div>
+                            <div class="form-control">
+                                <label class="label cursor-pointer justify-start gap-3">
+                                    <input type="checkbox" id="rbacEnabled" class="toggle toggle-primary" onchange="onRBACToggle()" />
+                                    <span class="label-text">JWT 인증 + RBAC 사용</span>
+                                </label>
+                            </div>
+                            <div id="rbac-details" class="hidden mt-4 space-y-3">
+                                <div class="form-control">
+                                    <label class="label"><span class="label-text">JWT Secret</span></label>
+                                    <input type="text" id="jwtSecret" value="ggami-secret-change-me"
+                                        class="input input-bordered input-sm w-full" />
+                                </div>
+                                <div class="form-control">
+                                    <label class="label"><span class="label-text">역할 (콤마로 구분)</span></label>
+                                    <input type="text" id="rbacRoles" value="admin,editor,viewer"
+                                        class="input input-bordered input-sm w-full" />
+                                </div>
+                                <!-- 권한 매트릭스 -->
+                                <div id="rbac-matrix" class="mt-2">
+                                    <!-- JS로 생성 -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <button onclick="generateProject()" id="btn-generate"
-                        class="btn btn-warning w-full mt-4">
-                        Go 프로젝트 생성
-                    </button>
+                    <!-- 오른쪽: 모듈 또는 모델 정의 패널 -->
+                    <div class="w-96 border-l border-base-300 pl-8">
+                        <!-- Simple 모드: 모듈 선택 -->
+                        <div id="module-panel">
+                            <h2 class="text-xl font-bold mb-4 text-base-content/70">모듈</h2>
+                            <div id="module-list" class="space-y-3 h-[400px] overflow-y-auto pr-2">
+                                <!-- JS로 채워짐 -->
+                            </div>
+                        </div>
+
+                        <!-- GORM 모드: 모델 정의 -->
+                        <div id="model-panel" class="hidden">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-xl font-bold text-base-content/70">모델 정의</h2>
+                                <button onclick="addModel()" class="btn btn-primary btn-xs">+ 모델 추가</button>
+                            </div>
+
+                            <!-- 모델 탭 리스트 -->
+                            <div id="model-tabs" class="tabs tabs-boxed mb-4">
+                                <!-- JS로 채워짐 -->
+                            </div>
+
+                            <!-- 활성 모델 편집 영역 -->
+                            <div id="model-editor" class="space-y-3 h-[500px] overflow-y-auto pr-2">
+                                <div class="text-base-content/50 text-sm text-center py-8">
+                                    "+ 모델 추가" 버튼으로 첫 모델을 만드세요
+                                </div>
+                            </div>
+                        </div>
+
+                        <button onclick="generateProject()" id="btn-generate"
+                            class="btn btn-warning w-full mt-4">
+                            Go 프로젝트 생성
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- 로그 출력 -->
-        <div id="log-output" class="mockup-code mt-6 w-full max-w-4xl hidden">
+        <div id="log-output" class="mockup-code mt-6 w-full max-w-6xl hidden">
             <pre data-prefix="$"><code id="log-text"></code></pre>
         </div>
     </div>

@@ -1,0 +1,22 @@
+package models
+{{- $needsTime := false}}
+{{- range .Model.Fields}}
+{{- if eq .Type "time.Time"}}{{- $needsTime = true}}{{- end}}
+{{- end}}
+{{- if $needsTime}}
+
+import "time"
+{{- end}}
+
+// {{.Model.Name}} GORM 모델
+type {{.Model.Name}} struct {
+{{- range .Model.Fields}}
+{{- if .IsID}}
+	{{.Name}} {{.Type}} `gorm:"{{.GormTag}}" json:"{{.JsonName}}"`
+{{- else if ne .GormTag ""}}
+	{{.Name}} {{.Type}} `gorm:"{{.GormTag}}" json:"{{.JsonName}}"`
+{{- else}}
+	{{.Name}} {{.Type}} `json:"{{.JsonName}}"`
+{{- end}}
+{{- end}}
+}

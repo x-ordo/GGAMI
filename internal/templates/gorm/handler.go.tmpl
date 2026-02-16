@@ -1,0 +1,183 @@
+package handlers
+
+import (
+	"html/template"
+	"net/http"
+	"strconv"
+
+	"github.com/go-chi/chi/v5"
+	"{{.ProjectName}}/models"
+	"gorm.io/gorm"
+)
+
+// {{.Model.Name}}Handler handles CRUD for {{.Model.Name}}
+type {{.Model.Name}}Handler struct {
+	db   *gorm.DB
+	tmpl *template.Template
+}
+
+// New{{.Model.Name}}Handler creates a new handler
+func New{{.Model.Name}}Handler(db *gorm.DB, tmpl *template.Template) *{{.Model.Name}}Handler {
+	return &{{.Model.Name}}Handler{db: db, tmpl: tmpl}
+}
+
+// ListPage renders the HTML list page
+func (h *{{.Model.Name}}Handler) ListPage(w http.ResponseWriter, r *http.Request) {
+	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+	if page < 1 {
+		page = 1
+	}
+	perPage := 20
+	offset := (page - 1) * perPage
+
+	var items []models.{{.Model.Name}}
+	var total int64
+	h.db.Model(&models.{{.Model.Name}}{}).Count(&total)
+	h.db.Offset(offset).Limit(perPage).Find(&items)
+
+	totalPages := int(total) / perPage
+	if int(total)%perPage > 0 {
+		totalPages++
+	}
+
+	var pages []int
+	for i := 1; i <= totalPages; i++ {
+		pages = append(pages, i)
+	}
+
+	data := map[string]interface{}{
+		"Items":      items,
+		"Page":       page,
+		"TotalPages": totalPages,
+		"Total":      total,
+		"Pages":      pages,
+	}
+	h.tmpl.ExecuteTemplate(w, "{{.Model.NameSnake}}_list.html", data)
+}
+
+// NewForm renders the create form
+func (h *{{.Model.Name}}Handler) NewForm(w http.ResponseWriter, r *http.Request) {
+	h.tmpl.ExecuteTemplate(w, "{{.Model.NameSnake}}_form.html", map[string]interface{}{
+		"Item":   models.{{.Model.Name}}{},
+		"IsEdit": false,
+	})
+}
+
+// EditForm renders the edit form
+func (h *{{.Model.Name}}Handler) EditForm(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	var item models.{{.Model.Name}}
+	if err := h.db.First(&item, id).Error; err != nil {
+		http.Error(w, "Not found", http.StatusNotFound)
+		return
+	}
+	h.tmpl.ExecuteTemplate(w, "{{.Model.NameSnake}}_form.html", map[string]interface{}{
+		"Item":   item,
+		"IsEdit": true,
+	})
+}
+
+// List returns JSON list
+func (h *{{.Model.Name}}Handler) List(w http.ResponseWriter, r *http.Request) {
+	var items []models.{{.Model.Name}}
+	h.db.Find(&items)
+
+	w.Header().Set("Content-Type", "application/json")
+	respondJSON(w, items)
+}
+
+// Create creates a new record
+func (h *{{.Model.Name}}Handler) Create(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	item := models.{{.Model.Name}}{}
+{{- range .Model.Fields}}
+{{- if not .IsID}}
+{{- if eq .Type "string"}}
+	item.{{.Name}} = r.FormValue("{{.JsonName}}")
+{{- else if eq .Type "int"}}
+	if v, err := strconv.Atoi(r.FormValue("{{.JsonName}}")); err == nil {
+		item.{{.Name}} = v
+	}
+{{- else if eq .Type "uint"}}
+	if v, err := strconv.ParseUint(r.FormValue("{{.JsonName}}"), 10, 64); err == nil {
+		item.{{.Name}} = uint(v)
+	}
+{{- else if eq .Type "float64"}}
+	if v, err := strconv.ParseFloat(r.FormValue("{{.JsonName}}"), 64); err == nil {
+		item.{{.Name}} = v
+	}
+{{- else if eq .Type "bool"}}
+	item.{{.Name}} = r.FormValue("{{.JsonName}}") == "true" || r.FormValue("{{.JsonName}}") == "on"
+{{- end}}
+{{- end}}
+{{- end}}
+
+	if err := h.db.Create(&item).Error; err != nil {
+		http.Error(w, "Create failed: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/{{.Model.NameSnake}}s/ui/list", http.StatusSeeOther)
+}
+
+// Get returns a single record
+func (h *{{.Model.Name}}Handler) Get(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	var item models.{{.Model.Name}}
+	if err := h.db.First(&item, id).Error; err != nil {
+		http.Error(w, "Not found", http.StatusNotFound)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	respondJSON(w, item)
+}
+
+// Update updates a record
+func (h *{{.Model.Name}}Handler) Update(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	var item models.{{.Model.Name}}
+	if err := h.db.First(&item, id).Error; err != nil {
+		http.Error(w, "Not found", http.StatusNotFound)
+		return
+	}
+
+	r.ParseForm()
+{{- range .Model.Fields}}
+{{- if not .IsID}}
+{{- if eq .Type "string"}}
+	item.{{.Name}} = r.FormValue("{{.JsonName}}")
+{{- else if eq .Type "int"}}
+	if v, err := strconv.Atoi(r.FormValue("{{.JsonName}}")); err == nil {
+		item.{{.Name}} = v
+	}
+{{- else if eq .Type "uint"}}
+	if v, err := strconv.ParseUint(r.FormValue("{{.JsonName}}"), 10, 64); err == nil {
+		item.{{.Name}} = uint(v)
+	}
+{{- else if eq .Type "float64"}}
+	if v, err := strconv.ParseFloat(r.FormValue("{{.JsonName}}"), 64); err == nil {
+		item.{{.Name}} = v
+	}
+{{- else if eq .Type "bool"}}
+	item.{{.Name}} = r.FormValue("{{.JsonName}}") == "true" || r.FormValue("{{.JsonName}}") == "on"
+{{- end}}
+{{- end}}
+{{- end}}
+
+	if err := h.db.Save(&item).Error; err != nil {
+		http.Error(w, "Update failed: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/{{.Model.NameSnake}}s/ui/list", http.StatusSeeOther)
+}
+
+// Delete removes a record
+func (h *{{.Model.Name}}Handler) Delete(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	if err := h.db.Delete(&models.{{.Model.Name}}{}, id).Error; err != nil {
+		http.Error(w, "Delete failed: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	http.Redirect(w, r, "/{{.Model.NameSnake}}s/ui/list", http.StatusSeeOther)
+}

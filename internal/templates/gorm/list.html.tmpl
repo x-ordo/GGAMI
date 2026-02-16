@@ -1,0 +1,58 @@
+{{define "content"}}
+<div class="flex justify-between items-center mb-6">
+    <div>
+        <h2 class="text-2xl font-bold"><<.Model.Name>> 목록</h2>
+        <p class="text-sm text-base-content/50">총 {{.Total}}건</p>
+    </div>
+    <a href="/<<.Model.NameSnake>>s/ui/new" class="btn btn-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        새로 만들기
+    </a>
+</div>
+
+<div class="card bg-base-100 shadow-sm">
+    <div class="overflow-x-auto">
+        <table class="table table-zebra">
+            <thead>
+                <tr>
+<<- range .Model.Fields>>
+                    <th><<.Name>></th>
+<<- end>>
+                    <th class="w-32">작업</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Items}}
+                <tr>
+<<- range .Model.Fields>>
+                    <td>{{.<<.Name>>}}</td>
+<<- end>>
+                    <td>
+                        <div class="flex gap-1">
+                            <a href="/<<$.Model.NameSnake>>s/ui/{{.ID}}/edit" class="btn btn-ghost btn-xs">편집</a>
+                            <form method="POST" action="/<<$.Model.NameSnake>>s/{{.ID}}/delete" onsubmit="return confirm('정말 삭제하시겠습니까?')">
+                                <button type="submit" class="btn btn-ghost btn-xs text-error">삭제</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{{if gt .TotalPages 1}}
+<div class="flex justify-center mt-6">
+    <div class="join">
+        {{range $i := .Pages}}
+        <a href="?page={{$i}}" class="join-item btn btn-sm {{if eq $i $.Page}}btn-active{{end}}">{{$i}}</a>
+        {{end}}
+    </div>
+</div>
+{{end}}
+{{end}}
+
+{{template "layout" .}}

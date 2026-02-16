@@ -26,13 +26,41 @@ func (g *GoGenerator) Scaffold(path string) error {
 	return nil
 }
 
+// scaffoldGorm creates additional directories for GORM projects
+func (g *GoGenerator) scaffoldGorm(path string) error {
+	dirs := []string{
+		path,
+		filepath.Join(path, "models"),
+		filepath.Join(path, "handlers"),
+		filepath.Join(path, "middleware"),
+		filepath.Join(path, "templates"),
+		filepath.Join(path, "assets"),
+	}
+	for _, dir := range dirs {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (g *GoGenerator) CreateManifest(config ProjectConfig) error {
+	if config.GormMode && len(config.Models) > 0 {
+		return nil // GormCodeGenerator handles go.mod via template
+	}
 	goMod := strings.Replace(templates.GoModTemplate(), "{{PROJECT_NAME}}", config.ProjectName, 1)
 	return os.WriteFile(filepath.Join(config.TargetPath, "go.mod"), []byte(goMod), 0644)
 }
 
 func (g *GoGenerator) GenerateCode(config ProjectConfig) error {
-	// Replace template variables
+	if config.GormMode && len(config.Models) > 0 {
+		if err := g.scaffoldGorm(config.TargetPath); err != nil {
+			return err
+		}
+		return (&GormCodeGenerator{}).Generate(config)
+	}
+
+	// Legacy: Replace template variables
 	mainGo := templates.GoMainTemplate()
 	mainGo = strings.Replace(mainGo, "{{DB_SERVER}}", config.DBServer, 1)
 	mainGo = strings.Replace(mainGo, "{{DB_USER}}", config.DBUser, 1)

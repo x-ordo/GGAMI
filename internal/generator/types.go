@@ -10,6 +10,12 @@ type ProjectConfig struct {
 	DBName      string   `json:"dbName"`
 	Port        int      `json:"port,omitempty"`
 	Modules     []string `json:"modules"`
+
+	// GORM full-stack generation fields
+	GormMode bool       `json:"gormMode,omitempty"`
+	Models   []ModelDef `json:"models,omitempty"`
+	DBType   DBType     `json:"dbType,omitempty"`
+	RBAC     *RBACConfig `json:"rbac,omitempty"`
 }
 
 // Generator interface defines the contract for code generators

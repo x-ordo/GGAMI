@@ -1,0 +1,119 @@
+package handlers
+
+import (
+	"html/template"
+	"net/http"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+	"{{.ProjectName}}/models"
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
+)
+
+// AuthHandler handles authentication
+type AuthHandler struct {
+	db        *gorm.DB
+	tmpl      *template.Template
+	jwtSecret string
+}
+
+// NewAuthHandler creates a new auth handler
+func NewAuthHandler(db *gorm.DB, tmpl *template.Template, jwtSecret string) *AuthHandler {
+	return &AuthHandler{db: db, tmpl: tmpl, jwtSecret: jwtSecret}
+}
+
+// LoginPage renders the login form
+func (h *AuthHandler) LoginPage(w http.ResponseWriter, r *http.Request) {
+	h.tmpl.ExecuteTemplate(w, "login.html", nil)
+}
+
+// Login authenticates a user and returns a JWT cookie
+func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	email := r.FormValue("email")
+	password := r.FormValue("password")
+
+	var user models.User
+	if err := h.db.Where("email = ?", email).First(&user).Error; err != nil {
+		h.tmpl.ExecuteTemplate(w, "login.html", map[string]interface{}{
+			"Error": "잘못된 이메일 또는 비밀번호입니다.",
+		})
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
+		h.tmpl.ExecuteTemplate(w, "login.html", map[string]interface{}{
+			"Error": "잘못된 이메일 또는 비밀번호입니다.",
+		})
+		return
+	}
+
+	// Generate JWT
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user_id": user.ID,
+		"email":   user.Email,
+		"role":    user.Role,
+		"exp":     time.Now().Add(24 * time.Hour).Unix(),
+	})
+
+	tokenStr, err := token.SignedString([]byte(h.jwtSecret))
+	if err != nil {
+		http.Error(w, "Token generation failed", http.StatusInternalServerError)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    tokenStr,
+		Path:     "/",
+		HttpOnly: true,
+		MaxAge:   86400,
+	})
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+// Register creates a new user
+func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	email := r.FormValue("email")
+	password := r.FormValue("password")
+	role := r.FormValue("role")
+
+	if role == "" {
+		role = "viewer"
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		http.Error(w, "Registration failed", http.StatusInternalServerError)
+		return
+	}
+
+	user := models.User{
+		Email:        email,
+		PasswordHash: string(hash),
+		Role:         role,
+	}
+
+	if err := h.db.Create(&user).Error; err != nil {
+		h.tmpl.ExecuteTemplate(w, "login.html", map[string]interface{}{
+			"Error": "등록 실패: " + err.Error(),
+		})
+		return
+	}
+
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
+}
+
+// Logout clears the token cookie
+func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:   "token",
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	})
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
+}

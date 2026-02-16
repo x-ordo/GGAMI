@@ -1,0 +1,60 @@
+package middleware
+
+import (
+	"net/http"
+)
+
+// Permission represents CRUD permission flags
+type Permission struct {
+	Create bool
+	Read   bool
+	Update bool
+	Delete bool
+}
+
+// PermissionMatrix maps role → model → Permission
+var PermissionMatrix = {{.RBACMatrix}}
+
+// RequirePermission checks if the user's role has the required permission for a model
+func RequirePermission(model string, action string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			role := GetUserRole(r)
+			if role == "" {
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
+			}
+
+			perms, ok := PermissionMatrix[role]
+			if !ok {
+				http.Error(w, "Forbidden", http.StatusForbidden)
+				return
+			}
+
+			modelPerms, ok := perms[model]
+			if !ok {
+				http.Error(w, "Forbidden", http.StatusForbidden)
+				return
+			}
+
+			allowed := false
+			switch action {
+			case "create":
+				allowed = modelPerms.Create
+			case "read":
+				allowed = modelPerms.Read
+			case "update":
+				allowed = modelPerms.Update
+			case "delete":
+				allowed = modelPerms.Delete
+			}
+
+			if !allowed {
+				http.Error(w, "Forbidden: insufficient permissions", http.StatusForbidden)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
