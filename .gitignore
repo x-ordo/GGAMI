@@ -30,6 +30,6 @@ vendor/
 # OS files
 Thumbs.db
 
-# Legacy artifacts
-node_modules/
-dist/
+# Frontend build artifacts
+frontend/node_modules/
+frontend/dist/

@@ -1,40 +1,39 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ggami Builder</title>
+    <title>까미 빌더</title>
     <script src="https://unpkg.com/htmx.org@1.9.12"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        [data-view] { display: none; }
-        [data-view].active { display: block; }
-    </style>
+    <link rel="stylesheet" href="dist/output.css" />
 </head>
-<body class="bg-gray-900 text-white min-h-screen">
-    <!-- Top Navigation -->
-    <nav class="bg-gray-800 border-b border-gray-700 px-6 py-3 flex items-center gap-6">
-        <span class="text-xl font-bold text-yellow-400">Ggami Builder</span>
-        <div class="flex bg-gray-700 rounded p-1">
+<body class="bg-base-100 text-base-content min-h-screen">
+    <!-- 상단 네비게이션 -->
+    <nav class="navbar bg-base-200 border-b border-base-300 px-6 min-h-0 py-2">
+        <div class="flex items-center gap-2 mr-6">
+            <img src="assets/logo.png" alt="까미" class="w-8 h-8 rounded" />
+            <span class="text-xl font-bold text-warning">까미 빌더</span>
+        </div>
+        <div class="join">
             <button onclick="switchView('generator')" id="nav-generator"
-                class="px-4 py-1.5 rounded text-sm font-bold transition bg-yellow-500 text-black">
-                Code Generator
+                class="join-item btn btn-sm btn-warning">
+                코드 생성기
             </button>
             <button onclick="switchView('builder')" id="nav-builder"
-                class="px-4 py-1.5 rounded text-sm font-bold transition text-gray-400 hover:text-white">
-                Visual Builder
+                class="join-item btn btn-sm btn-ghost">
+                비주얼 빌더
             </button>
         </div>
     </nav>
 
-    <!-- Generator View -->
+    <!-- 코드 생성기 뷰 -->
     <div data-view="generator" class="active">
-        <iframe src="generator.html" class="w-full border-0" style="height: calc(100vh - 56px);"></iframe>
+        <iframe src="generator.html" class="w-full border-0" style="height: calc(100vh - 48px);"></iframe>
     </div>
 
-    <!-- Builder View -->
+    <!-- 비주얼 빌더 뷰 -->
     <div data-view="builder">
-        <iframe src="builder.html" class="w-full border-0" style="height: calc(100vh - 56px);"></iframe>
+        <iframe src="builder.html" class="w-full border-0" style="height: calc(100vh - 48px);"></iframe>
     </div>
 
     <script>
@@ -42,12 +41,16 @@
             document.querySelectorAll('[data-view]').forEach(el => el.classList.remove('active'));
             document.querySelector(`[data-view="${view}"]`).classList.add('active');
 
-            // Update nav button styles
-            document.querySelectorAll('nav button').forEach(btn => {
-                btn.className = 'px-4 py-1.5 rounded text-sm font-bold transition text-gray-400 hover:text-white';
-            });
-            const activeBtn = document.getElementById(`nav-${view}`);
-            activeBtn.className = 'px-4 py-1.5 rounded text-sm font-bold transition bg-yellow-500 text-black';
+            const btnGen = document.getElementById('nav-generator');
+            const btnBuild = document.getElementById('nav-builder');
+
+            if (view === 'generator') {
+                btnGen.className = 'join-item btn btn-sm btn-warning';
+                btnBuild.className = 'join-item btn btn-sm btn-ghost';
+            } else {
+                btnGen.className = 'join-item btn btn-sm btn-ghost';
+                btnBuild.className = 'join-item btn btn-sm btn-warning';
+            }
         }
     </script>
 </body>

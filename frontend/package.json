@@ -1,0 +1,13 @@
+{
+  "name": "ggami-frontend",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/input.css -o ./dist/output.css --minify",
+    "watch:css": "tailwindcss -i ./src/input.css -o ./dist/output.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4",
+    "daisyui": "^4.12",
+    "@tailwindcss/typography": "^0.5"
+  }
+}

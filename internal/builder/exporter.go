@@ -40,15 +40,15 @@ func (e *Exporter) renderPage(page Page) string {
 	}
 
 	return fmt.Sprintf(`<!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-theme="corporate">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>%s - %s</title>
-    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4/dist/full.min.css" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100">
+<body class="bg-base-100">
 %s
 </body>
 </html>`, e.project.Name, page.Name, body.String())

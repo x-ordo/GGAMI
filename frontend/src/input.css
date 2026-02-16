@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: oklch(var(--b2));
+}
+
+::-webkit-scrollbar-thumb {
+    background: oklch(var(--b3));
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: oklch(var(--bc) / 0.3);
+}
+
+/* View switching */
+[data-view] { display: none; }
+[data-view].active { display: block; }
+
+/* Builder drag-over state */
+.drag-over { border-color: oklch(var(--p)) !important; background-color: oklch(var(--p) / 0.1) !important; }

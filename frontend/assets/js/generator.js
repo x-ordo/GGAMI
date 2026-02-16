@@ -1,15 +1,15 @@
-// Generator page logic
+// 코드 생성기 페이지 로직
 let currentLanguage = 'go';
 let selectedModules = [];
 let allModules = [];
 
-// Initialize on page load
+// 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         allModules = await window.go.main.App.GetModules();
         renderModules();
     } catch (err) {
-        console.error('Failed to load modules:', err);
+        console.error('모듈 로드 실패:', err);
     }
 });
 
@@ -21,15 +21,15 @@ function setLanguage(lang) {
     const btnGenerate = document.getElementById('btn-generate');
 
     if (lang === 'go') {
-        btnGo.className = 'flex-1 px-3 py-1 rounded text-sm font-bold transition bg-yellow-500 text-black shadow';
-        btnNode.className = 'flex-1 px-3 py-1 rounded text-sm font-bold transition text-gray-400 hover:text-white';
-        btnGenerate.className = 'w-full font-bold py-3 rounded mt-4 transition cursor-pointer bg-yellow-500 text-black hover:bg-yellow-400';
-        btnGenerate.textContent = 'Generate Go Project';
+        btnGo.className = 'join-item btn btn-sm flex-1 btn-warning';
+        btnNode.className = 'join-item btn btn-sm flex-1 btn-ghost';
+        btnGenerate.className = 'btn btn-warning w-full mt-4';
+        btnGenerate.textContent = 'Go 프로젝트 생성';
     } else {
-        btnGo.className = 'flex-1 px-3 py-1 rounded text-sm font-bold transition text-gray-400 hover:text-white';
-        btnNode.className = 'flex-1 px-3 py-1 rounded text-sm font-bold transition bg-green-600 text-white shadow';
-        btnGenerate.className = 'w-full font-bold py-3 rounded mt-4 transition cursor-pointer bg-green-600 text-white hover:bg-green-500';
-        btnGenerate.textContent = 'Generate Node.js Project';
+        btnGo.className = 'join-item btn btn-sm flex-1 btn-ghost';
+        btnNode.className = 'join-item btn btn-sm flex-1 btn-success';
+        btnGenerate.className = 'btn btn-success w-full mt-4';
+        btnGenerate.textContent = 'Node.js 프로젝트 생성';
     }
 }
 
@@ -40,18 +40,20 @@ function renderModules() {
     for (const mod of allModules) {
         const isSelected = selectedModules.includes(mod.id);
         const el = document.createElement('div');
-        el.className = `p-3 rounded border cursor-pointer transition ${
+        el.className = `card card-compact bg-base-300 border cursor-pointer transition mb-2 ${
             isSelected
-            ? 'bg-blue-900/40 border-blue-500'
-            : 'bg-gray-800 border-gray-600 hover:border-gray-500'
+            ? 'border-primary bg-primary/10'
+            : 'border-base-content/10 hover:border-base-content/30'
         }`;
         el.onclick = () => toggleModule(mod.id);
         el.innerHTML = `
-            <div class="flex justify-between items-start">
-                <h3 class="font-bold text-sm">${mod.name}</h3>
-                ${isSelected ? '<span class="text-blue-400 text-xs">&#10004;</span>' : ''}
+            <div class="card-body p-3">
+                <div class="flex justify-between items-start">
+                    <h3 class="font-bold text-sm">${mod.name}</h3>
+                    ${isSelected ? '<span class="badge badge-primary badge-sm">&#10004;</span>' : ''}
+                </div>
+                <p class="text-xs text-base-content/50">${mod.description}</p>
             </div>
-            <p class="text-xs text-gray-400 mt-1">${mod.description}</p>
         `;
         list.appendChild(el);
     }
@@ -74,14 +76,15 @@ async function selectDirectory() {
             document.getElementById('targetPath').value = dir + '\\' + projectName;
         }
     } catch (err) {
-        console.error('Directory selection failed:', err);
+        console.error('폴더 선택 실패:', err);
     }
 }
 
 async function generateProject() {
-    const logEl = document.getElementById('log-output');
-    logEl.classList.remove('hidden');
-    logEl.textContent = `[${currentLanguage.toUpperCase()}] Generating... please wait`;
+    const logOutput = document.getElementById('log-output');
+    const logText = document.getElementById('log-text');
+    logOutput.classList.remove('hidden');
+    logText.textContent = `[${currentLanguage.toUpperCase()}] 생성 중... 잠시만 기다려주세요`;
 
     const config = {
         projectName: document.getElementById('projectName').value,
@@ -98,14 +101,14 @@ async function generateProject() {
 
         if (result.success) {
             if (currentLanguage === 'go') {
-                logEl.textContent = 'Go server generated!\nIn terminal:\n  go mod tidy\n  go run .';
+                logText.textContent = 'Go 서버 생성 완료!\n터미널에서 실행:\n  go mod tidy\n  go run .';
             } else {
-                logEl.textContent = 'Node.js server generated!\nIn terminal:\n  npm install\n  npm start';
+                logText.textContent = 'Node.js 서버 생성 완료!\n터미널에서 실행:\n  npm install\n  npm start';
             }
         } else {
-            logEl.textContent = 'Failed: ' + result.message;
+            logText.textContent = '실패: ' + result.message;
         }
     } catch (err) {
-        logEl.textContent = 'Error: ' + err;
+        logText.textContent = '오류: ' + err;
     }
 }

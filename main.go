@@ -21,7 +21,7 @@ func main() {
 	handler := api.NewHandler(pm)
 
 	err := wails.Run(&options.App{
-		Title:  "Ggami Builder",
+		Title:  "까미 빌더",
 		Width:  1400,
 		Height: 900,
 		AssetServer: &assetserver.Options{

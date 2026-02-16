@@ -25,21 +25,21 @@ func (c *Component) ToHTML() string {
 		if text == "" {
 			text = "Heading"
 		}
-		return fmt.Sprintf(`<h1 class="%s" style="%s">%s</h1>`, classes, styleAttr, text)
+		return fmt.Sprintf(`<h1 class="text-3xl font-bold %s" style="%s">%s</h1>`, classes, styleAttr, text)
 
 	case "paragraph":
 		text := c.Content
 		if text == "" {
 			text = "Paragraph text here..."
 		}
-		return fmt.Sprintf(`<p class="%s" style="%s">%s</p>`, classes, styleAttr, text)
+		return fmt.Sprintf(`<p class="text-base-content %s" style="%s">%s</p>`, classes, styleAttr, text)
 
 	case "button":
 		text := c.Content
 		if text == "" {
 			text = "Click Me"
 		}
-		return fmt.Sprintf(`<button class="%s" style="%s">%s</button>`, classes, styleAttr, text)
+		return fmt.Sprintf(`<button class="btn btn-primary %s" style="%s">%s</button>`, classes, styleAttr, text)
 
 	case "image":
 		src := c.Content
@@ -53,26 +53,34 @@ func (c *Component) ToHTML() string {
 		for _, child := range c.Children {
 			childrenHTML.WriteString(child.ToHTML())
 		}
-		return fmt.Sprintf(`<div class="%s" style="%s">%s</div>`, classes, styleAttr, childrenHTML.String())
+		return fmt.Sprintf(`<div class="p-4 %s" style="%s">%s</div>`, classes, styleAttr, childrenHTML.String())
 
 	case "hero":
 		text := c.Content
 		if text == "" {
 			text = "Hero Section"
 		}
-		return fmt.Sprintf(`<section class="bg-gray-900 text-white py-20 px-10 text-center rounded-xl %s" style="%s">
-    <h1 class="text-4xl font-bold mb-4">%s</h1>
-    <p class="text-xl text-gray-400 mb-8">A stunning hero section for your website.</p>
-    <button class="bg-yellow-500 text-black font-bold py-3 px-8 rounded-full hover:bg-yellow-400 transition">Get Started</button>
+		return fmt.Sprintf(`<section class="hero bg-base-200 min-h-[300px] %s" style="%s">
+    <div class="hero-content text-center">
+        <div class="max-w-md">
+            <h1 class="text-4xl font-bold mb-4">%s</h1>
+            <p class="mb-8 text-base-content/70">A stunning hero section for your website.</p>
+            <button class="btn btn-primary">Get Started</button>
+        </div>
+    </div>
 </section>`, classes, styleAttr, text)
 
 	case "navbar":
-		return fmt.Sprintf(`<nav class="bg-white shadow-md px-6 py-4 flex items-center justify-between %s" style="%s">
-    <span class="text-xl font-bold">Brand</span>
-    <div class="flex gap-4">
-        <a href="#" class="text-gray-600 hover:text-gray-900">Home</a>
-        <a href="#" class="text-gray-600 hover:text-gray-900">About</a>
-        <a href="#" class="text-gray-600 hover:text-gray-900">Contact</a>
+		return fmt.Sprintf(`<nav class="navbar bg-base-100 shadow-md %s" style="%s">
+    <div class="flex-1">
+        <a class="btn btn-ghost text-xl">Brand</a>
+    </div>
+    <div class="flex-none">
+        <ul class="menu menu-horizontal px-1">
+            <li><a>Home</a></li>
+            <li><a>About</a></li>
+            <li><a>Contact</a></li>
+        </ul>
     </div>
 </nav>`, classes, styleAttr)
 
@@ -81,26 +89,32 @@ func (c *Component) ToHTML() string {
 		if text == "" {
 			text = "Card Title"
 		}
-		return fmt.Sprintf(`<div class="bg-white rounded-lg shadow-md p-6 %s" style="%s">
-    <h3 class="text-lg font-bold mb-2">%s</h3>
-    <p class="text-gray-600">Card content goes here.</p>
+		return fmt.Sprintf(`<div class="card bg-base-100 shadow-md %s" style="%s">
+    <div class="card-body">
+        <h2 class="card-title">%s</h2>
+        <p>Card content goes here.</p>
+    </div>
 </div>`, classes, styleAttr, text)
 
 	case "form":
-		return fmt.Sprintf(`<form class="bg-white p-6 rounded-lg shadow-md space-y-4 %s" style="%s">
-    <div>
-        <label class="block text-gray-700 font-medium mb-1">Name</label>
-        <input type="text" class="w-full border rounded p-2" placeholder="Enter name" />
+		return fmt.Sprintf(`<div class="card bg-base-100 shadow-md %s" style="%s">
+    <div class="card-body">
+        <form class="space-y-4">
+            <div class="form-control">
+                <label class="label"><span class="label-text">Name</span></label>
+                <input type="text" class="input input-bordered" placeholder="Enter name" />
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text">Email</span></label>
+                <input type="email" class="input input-bordered" placeholder="Enter email" />
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
     </div>
-    <div>
-        <label class="block text-gray-700 font-medium mb-1">Email</label>
-        <input type="email" class="w-full border rounded p-2" placeholder="Enter email" />
-    </div>
-    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Submit</button>
-</form>`, classes, styleAttr)
+</div>`, classes, styleAttr)
 
 	case "footer":
-		return fmt.Sprintf(`<footer class="bg-gray-800 text-gray-400 py-8 px-6 text-center %s" style="%s">
+		return fmt.Sprintf(`<footer class="footer footer-center bg-neutral text-neutral-content p-8 %s" style="%s">
     <p>&copy; 2026 Your Company. All rights reserved.</p>
 </footer>`, classes, styleAttr)
 

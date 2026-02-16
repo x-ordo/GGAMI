@@ -1,53 +1,51 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visual Builder</title>
+    <title>비주얼 빌더</title>
     <script src="https://unpkg.com/htmx.org@1.9.12"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .drag-over { border-color: #eab308 !important; background-color: rgba(234, 179, 8, 0.1) !important; }
-    </style>
+    <link rel="stylesheet" href="dist/output.css" />
 </head>
-<body class="bg-gray-900 text-white">
+<body class="bg-base-100 text-base-content">
     <div class="flex h-screen">
 
-        <!-- Left Sidebar: Component Library -->
-        <div class="w-64 bg-gray-800 border-r border-gray-700 p-4 overflow-y-auto flex flex-col">
-            <h2 class="text-lg font-bold mb-3 text-yellow-400">Components</h2>
+        <!-- 왼쪽 사이드바: 컴포넌트 라이브러리 -->
+        <div class="w-64 bg-base-200 border-r border-base-300 p-4 overflow-y-auto flex flex-col">
+            <h2 class="text-lg font-bold mb-3 text-warning">컴포넌트</h2>
             <div id="component-library" hx-get="/api/components" hx-trigger="load" hx-swap="innerHTML">
-                <div class="text-gray-500 text-sm">Loading...</div>
+                <div class="text-base-content/50 text-sm">불러오는 중...</div>
             </div>
 
-            <div class="mt-auto pt-4 border-t border-gray-700 space-y-2">
-                <button onclick="newProject()" class="w-full bg-gray-700 text-sm py-2 rounded hover:bg-gray-600">New Project</button>
-                <button onclick="saveProject()" class="w-full bg-gray-700 text-sm py-2 rounded hover:bg-gray-600">Save Project</button>
-                <button onclick="loadProject()" class="w-full bg-gray-700 text-sm py-2 rounded hover:bg-gray-600">Load Project</button>
-                <button onclick="exportHTML()" class="w-full bg-yellow-500 text-black text-sm font-bold py-2 rounded hover:bg-yellow-400">Export HTML</button>
+            <div class="mt-auto pt-4 border-t border-base-300 space-y-2">
+                <button onclick="newProject()" class="btn btn-sm btn-ghost w-full">새 프로젝트</button>
+                <button onclick="saveProject()" class="btn btn-sm btn-ghost w-full">프로젝트 저장</button>
+                <button onclick="loadProject()" class="btn btn-sm btn-ghost w-full">프로젝트 열기</button>
+                <button onclick="exportHTML()" class="btn btn-sm btn-warning w-full">HTML 내보내기</button>
             </div>
         </div>
 
-        <!-- Center: Canvas -->
+        <!-- 중앙: 캔버스 -->
         <div class="flex-1 flex flex-col">
-            <div class="bg-gray-800 border-b border-gray-700 px-4 py-2 flex items-center justify-between">
-                <span id="project-name" class="text-sm text-gray-400">No project loaded</span>
-                <span class="text-xs text-gray-500" id="component-count">0 components</span>
+            <div class="navbar bg-base-200 border-b border-base-300 px-4 min-h-8 py-0">
+                <span id="project-name" class="text-sm text-base-content/50">프로젝트 없음</span>
+                <span class="flex-1"></span>
+                <span class="text-xs text-base-content/30" id="component-count">컴포넌트 0개</span>
             </div>
             <div id="canvas"
                  ondrop="onDrop(event)" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)"
-                 class="flex-1 overflow-y-auto p-6 bg-gray-100 border-2 border-dashed border-gray-300 m-4 rounded-lg transition">
-                <div id="canvas-empty" class="flex items-center justify-center h-full text-gray-400">
-                    Drag components here to start building
+                 class="flex-1 overflow-y-auto p-6 bg-base-100 border-2 border-dashed border-base-300 m-4 rounded-lg transition">
+                <div id="canvas-empty" class="flex items-center justify-center h-full text-base-content/50">
+                    컴포넌트를 여기에 드래그하여 시작하세요
                 </div>
             </div>
         </div>
 
-        <!-- Right: Property Panel -->
-        <div class="w-80 bg-gray-800 border-l border-gray-700 p-4 overflow-y-auto">
-            <h2 class="text-lg font-bold mb-3 text-gray-300">Properties</h2>
+        <!-- 오른쪽: 속성 패널 -->
+        <div class="w-80 bg-base-200 border-l border-base-300 p-4 overflow-y-auto">
+            <h2 class="text-lg font-bold mb-3 text-base-content/70">속성</h2>
             <div id="property-panel">
-                <p class="text-sm text-gray-500">Select a component to edit its properties</p>
+                <p class="text-sm text-base-content/50">컴포넌트를 선택하면 속성을 편집할 수 있습니다</p>
             </div>
         </div>
     </div>
