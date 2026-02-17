@@ -6,10 +6,10 @@ import (
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 
-	"ggami/internal/application"
-	"ggami/internal/builder"
-	"ggami/internal/generator"
-	"ggami/internal/modules"
+	"ggami-go/internal/application"
+	"ggami-go/internal/builder"
+	"ggami-go/internal/generator"
+	"ggami-go/internal/modules"
 )
 
 // App struct

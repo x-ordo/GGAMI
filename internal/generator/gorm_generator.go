@@ -7,7 +7,7 @@ import (
 	"strings"
 	"text/template"
 
-	gormtmpl "ggami/internal/templates/gorm"
+	gormtmpl "ggami-go/internal/templates/gorm"
 )
 
 // GormCodeGenerator generates multi-file GORM-based Go projects
@@ -38,6 +38,11 @@ func (g *GormCodeGenerator) Generate(config ProjectConfig) error {
 	// HTML templates (use << >> delimiters so {{ }} passes through to output)
 	if err := g.renderHTMLFile(filepath.Join(config.TargetPath, "templates"), "layout.html", "layout.html.tmpl", data); err != nil {
 		return fmt.Errorf("layout.html: %w", err)
+	}
+
+	// Base dashboard pages
+	if err := g.renderBasePages(config.TargetPath, data); err != nil {
+		return fmt.Errorf("base pages: %w", err)
 	}
 
 	// Per-model files
@@ -86,6 +91,12 @@ func (g *GormCodeGenerator) Generate(config ProjectConfig) error {
 		if err := g.renderHTMLFile(filepath.Join(config.TargetPath, "templates"), "login.html", "login.html.tmpl", data); err != nil {
 			return fmt.Errorf("login template: %w", err)
 		}
+		if err := g.renderHTMLFile(filepath.Join(config.TargetPath, "templates"), "register.html", "register.html.tmpl", data); err != nil {
+			return fmt.Errorf("register template: %w", err)
+		}
+		if err := g.renderHTMLFile(filepath.Join(config.TargetPath, "templates"), "forgot_password.html", "forgot_password.html.tmpl", data); err != nil {
+			return fmt.Errorf("forgot_password template: %w", err)
+		}
 	}
 
 	return nil
@@ -131,6 +142,10 @@ func RenderHandlers(config ProjectConfig) error {
 	if err := g.renderGoFile(filepath.Join(config.TargetPath, "handlers"), "helpers.go", "helpers.go.tmpl", data); err != nil {
 		return fmt.Errorf("helpers.go: %w", err)
 	}
+	// Base handler
+	if err := g.renderGoFile(filepath.Join(config.TargetPath, "handlers"), "base.go", "base_handler.go.tmpl", data); err != nil {
+		return fmt.Errorf("base handler: %w", err)
+	}
 
 	for _, model := range data.Models {
 		modelData := struct {
@@ -153,6 +168,11 @@ func RenderHTMLTemplates(config ProjectConfig) error {
 
 	if err := g.renderHTMLFile(filepath.Join(config.TargetPath, "templates"), "layout.html", "layout.html.tmpl", data); err != nil {
 		return fmt.Errorf("layout.html: %w", err)
+	}
+
+	// Base dashboard pages
+	if err := g.renderBasePages(config.TargetPath, data); err != nil {
+		return fmt.Errorf("base pages: %w", err)
 	}
 
 	for _, model := range data.Models {
@@ -199,6 +219,12 @@ func RenderMiddleware(config ProjectConfig) error {
 	if err := g.renderHTMLFile(filepath.Join(config.TargetPath, "templates"), "login.html", "login.html.tmpl", data); err != nil {
 		return fmt.Errorf("login template: %w", err)
 	}
+	if err := g.renderHTMLFile(filepath.Join(config.TargetPath, "templates"), "register.html", "register.html.tmpl", data); err != nil {
+		return fmt.Errorf("register template: %w", err)
+	}
+	if err := g.renderHTMLFile(filepath.Join(config.TargetPath, "templates"), "forgot_password.html", "forgot_password.html.tmpl", data); err != nil {
+		return fmt.Errorf("forgot_password template: %w", err)
+	}
 	return nil
 }
 
@@ -220,6 +246,42 @@ func (g *GormCodeGenerator) renderGoFile(dir, filename, tmplName string, data in
 	}
 
 	return os.WriteFile(filepath.Join(dir, filename), []byte(buf.String()), 0644)
+}
+
+// renderBasePages generates all dashboard base page templates and the base handler
+func (g *GormCodeGenerator) renderBasePages(targetPath string, data TemplateData) error {
+	// Base handler (Go file)
+	if err := g.renderGoFile(filepath.Join(targetPath, "handlers"), "base.go", "base_handler.go.tmpl", data); err != nil {
+		return fmt.Errorf("base handler: %w", err)
+	}
+
+	// Base HTML pages (use << >> delimiters)
+	basePages := []struct {
+		output string
+		tmpl   string
+	}{
+		{"dashboard.html", "dashboard.html.tmpl"},
+		{"leads.html", "leads.html.tmpl"},
+		{"transactions.html", "transactions.html.tmpl"},
+		{"charts.html", "charts.html.tmpl"},
+		{"integration.html", "integration.html.tmpl"},
+		{"calendar.html", "calendar.html.tmpl"},
+		{"profile_settings.html", "profile_settings.html.tmpl"},
+		{"team.html", "team.html.tmpl"},
+		{"billing.html", "billing.html.tmpl"},
+		{"welcome.html", "welcome.html.tmpl"},
+		{"blank.html", "blank.html.tmpl"},
+		{"404.html", "404.html.tmpl"},
+	}
+
+	tmplDir := filepath.Join(targetPath, "templates")
+	for _, p := range basePages {
+		if err := g.renderHTMLFile(tmplDir, p.output, p.tmpl, data); err != nil {
+			return fmt.Errorf("%s: %w", p.output, err)
+		}
+	}
+
+	return nil
 }
 
 // renderHTMLFile renders an HTML template using << >> delimiters

@@ -1,0 +1,18 @@
+{{define "content"}}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    {{range .Integrations}}
+    <div class="card bg-base-100 shadow-sm">
+        <div class="card-body">
+            <div class="flex items-center gap-3 mb-2">
+                <img src="{{.Icon}}" alt="{{.Name}}" class="w-10 h-10" />
+                <h2 class="card-title text-lg">{{.Name}}</h2>
+            </div>
+            <p class="text-base-content/60 text-sm">{{.Desc}}</p>
+            <div class="card-actions justify-end mt-3">
+                <input type="checkbox" class="toggle toggle-success toggle-lg" {{if .Active}}checked{{end}} />
+            </div>
+        </div>
+    </div>
+    {{end}}
+</div>
+{{end}}

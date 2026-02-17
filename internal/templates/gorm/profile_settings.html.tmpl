@@ -1,0 +1,52 @@
+{{define "content"}}
+<div class="card bg-base-100 shadow-sm">
+    <div class="card-body">
+        <h2 class="card-title">Profile Settings</h2>
+        <div class="divider mt-2"></div>
+        <form method="POST" action="/dashboard/profile">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="form-control">
+                    <label class="label"><span class="label-text">Name</span></label>
+                    <input type="text" name="name" value="{{.Profile.Name}}" class="input input-bordered w-full" />
+                </div>
+                <div class="form-control">
+                    <label class="label"><span class="label-text">Email</span></label>
+                    <input type="email" name="email" value="{{.Profile.Email}}" class="input input-bordered w-full" />
+                </div>
+                <div class="form-control">
+                    <label class="label"><span class="label-text">Title</span></label>
+                    <input type="text" name="title" value="{{.Profile.Title}}" class="input input-bordered w-full" />
+                </div>
+                <div class="form-control">
+                    <label class="label"><span class="label-text">Place</span></label>
+                    <input type="text" name="place" value="{{.Profile.Place}}" class="input input-bordered w-full" />
+                </div>
+                <div class="form-control md:col-span-2">
+                    <label class="label"><span class="label-text">About</span></label>
+                    <textarea name="about" class="textarea textarea-bordered w-full" rows="3">{{.Profile.About}}</textarea>
+                </div>
+            </div>
+            <div class="divider"></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="form-control">
+                    <label class="label"><span class="label-text">Language</span></label>
+                    <input type="text" name="language" value="{{.Profile.Language}}" class="input input-bordered w-full" />
+                </div>
+                <div class="form-control">
+                    <label class="label"><span class="label-text">Timezone</span></label>
+                    <input type="text" name="timezone" value="{{.Profile.Timezone}}" class="input input-bordered w-full" />
+                </div>
+                <div class="form-control">
+                    <label class="label cursor-pointer justify-start gap-4">
+                        <span class="label-text">Sync Data</span>
+                        <input type="checkbox" class="toggle toggle-primary" checked />
+                    </label>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button type="submit" class="btn btn-primary">Update</button>
+            </div>
+        </form>
+    </div>
+</div>
+{{end}}

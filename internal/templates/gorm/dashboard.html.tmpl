@@ -1,0 +1,131 @@
+{{define "content"}}
+<!-- Stat cards -->
+<div class="grid lg:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-4 mb-6">
+    {{range .Stats}}
+    <div class="stats shadow bg-base-100">
+        <div class="stat">
+            <div class="stat-figure text-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            </div>
+            <div class="stat-title">{{.Title}}</div>
+            <div class="stat-value text-primary">{{.Value}}</div>
+            <div class="stat-desc">{{.Desc}}</div>
+        </div>
+    </div>
+    {{end}}
+</div>
+
+<!-- Charts row -->
+<div class="grid lg:grid-cols-2 grid-cols-1 gap-4 mb-6">
+    <div class="card bg-base-100 shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title text-base">Monthly Active Users (MAU)</h2>
+            <div class="divider mt-0 mb-0"></div>
+            <canvas id="lineChart" height="200"></canvas>
+        </div>
+    </div>
+    <div class="card bg-base-100 shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title text-base">Revenue</h2>
+            <div class="divider mt-0 mb-0"></div>
+            <canvas id="barChart" height="200"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Amount stats + Page stats -->
+<div class="grid lg:grid-cols-2 grid-cols-1 gap-4 mb-6">
+    <div class="stats stats-vertical lg:stats-horizontal shadow bg-base-100 w-full">
+        {{range .AmountStats}}
+        <div class="stat">
+            <div class="stat-title">{{.Title}}</div>
+            <div class="stat-value">{{.Value}}</div>
+            <div class="stat-desc">{{.Desc}}</div>
+        </div>
+        {{end}}
+    </div>
+    <div class="stats stats-vertical lg:stats-horizontal shadow bg-base-100 w-full">
+        {{range .PageStats}}
+        <div class="stat">
+            <div class="stat-title">{{.Title}}</div>
+            <div class="stat-value">{{.Value}}</div>
+            <div class="stat-desc">{{.Desc}}</div>
+        </div>
+        {{end}}
+    </div>
+</div>
+
+<!-- User channels + Doughnut -->
+<div class="grid lg:grid-cols-2 grid-cols-1 gap-4">
+    <div class="card bg-base-100 shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title text-base">User Channels</h2>
+            <div class="divider mt-0 mb-0"></div>
+            <div class="overflow-x-auto">
+                <table class="table table-sm">
+                    <thead>
+                        <tr><th>Source</th><th>Users</th><th>Conversion</th></tr>
+                    </thead>
+                    <tbody>
+                        {{range .UserChannels}}
+                        <tr><td>{{.Source}}</td><td>{{.Users}}</td><td>{{.Conversion}}</td></tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="card bg-base-100 shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title text-base">Orders by Category</h2>
+            <div class="divider mt-0 mb-0"></div>
+            <canvas id="doughnutChart" height="200"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script>
+// Line chart - MAU
+new Chart(document.getElementById('lineChart'), {
+    type: 'line',
+    data: {
+        labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+        datasets: [{
+            label: 'MAU',
+            data: [26, 20, 30, 22, 17, 29, 32, 27, 35, 40, 38, 42],
+            borderColor: 'oklch(var(--p))',
+            backgroundColor: 'oklch(var(--p) / 0.1)',
+            fill: true, tension: 0.3
+        }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } } }
+});
+
+// Bar chart - Revenue
+new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+        labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+        datasets: [
+            { label: 'Store 1', data: [10, 15, 20, 25, 18, 22, 30, 28, 35, 32, 40, 38], backgroundColor: 'oklch(var(--p) / 0.7)' },
+            { label: 'Store 2', data: [8, 12, 15, 20, 14, 18, 25, 22, 28, 26, 32, 30], backgroundColor: 'oklch(var(--s) / 0.7)' }
+        ]
+    },
+    options: { responsive: true }
+});
+
+// Doughnut chart - Orders by Category
+new Chart(document.getElementById('doughnutChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Electronics','Home Appliances','Beauty','Furniture','Watches','Apparel'],
+        datasets: [{
+            data: [122, 219, 30, 51, 82, 13],
+            backgroundColor: ['oklch(var(--p))','oklch(var(--s))','oklch(var(--a))','oklch(var(--n))','oklch(var(--in))','oklch(var(--wa))']
+        }]
+    },
+    options: { responsive: true, cutout: '60%' }
+});
+</script>
+{{end}}

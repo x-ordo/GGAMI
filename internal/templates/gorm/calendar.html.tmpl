@@ -1,0 +1,82 @@
+{{define "content"}}
+<div class="card bg-base-100 shadow-sm">
+    <div class="card-body">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="card-title text-base" id="calTitle"></h2>
+            <div class="flex gap-2">
+                <button class="btn btn-sm btn-outline" onclick="calPrev()">&#9664;</button>
+                <button class="btn btn-sm btn-outline" onclick="calNext()">&#9654;</button>
+                <button class="btn btn-sm btn-primary" onclick="calToday()">Today</button>
+            </div>
+        </div>
+        <div class="grid grid-cols-7 gap-px bg-base-300 border border-base-300 rounded-box overflow-hidden" id="calGrid">
+            <div class="bg-base-200 p-2 text-center font-semibold text-sm">Sun</div>
+            <div class="bg-base-200 p-2 text-center font-semibold text-sm">Mon</div>
+            <div class="bg-base-200 p-2 text-center font-semibold text-sm">Tue</div>
+            <div class="bg-base-200 p-2 text-center font-semibold text-sm">Wed</div>
+            <div class="bg-base-200 p-2 text-center font-semibold text-sm">Thu</div>
+            <div class="bg-base-200 p-2 text-center font-semibold text-sm">Fri</div>
+            <div class="bg-base-200 p-2 text-center font-semibold text-sm">Sat</div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    var now = new Date(), year = now.getFullYear(), month = now.getMonth();
+    var events = [
+        {title:'Product Launch',day:3,theme:'bg-primary text-primary-content'},
+        {title:'Team Meeting',day:7,theme:'bg-secondary text-secondary-content'},
+        {title:'Sprint Review',day:12,theme:'bg-accent text-accent-content'},
+        {title:'Client Call',day:15,theme:'bg-info text-info-content'},
+        {title:'Workshop',day:18,theme:'bg-warning text-warning-content'},
+        {title:'Release Day',day:22,theme:'bg-success text-success-content'},
+        {title:'Retrospective',day:25,theme:'bg-primary text-primary-content'},
+        {title:'Planning',day:28,theme:'bg-secondary text-secondary-content'},
+    ];
+
+    function render(){
+        var grid = document.getElementById('calGrid');
+        // Remove day cells, keep header
+        while(grid.children.length > 7) grid.removeChild(grid.lastChild);
+
+        var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        document.getElementById('calTitle').textContent = months[month] + ' ' + year;
+
+        var first = new Date(year, month, 1).getDay();
+        var days = new Date(year, month+1, 0).getDate();
+        var today = new Date();
+
+        for(var i=0;i<first;i++){
+            var e=document.createElement('div');
+            e.className='bg-base-100 p-2 min-h-[80px]';
+            grid.appendChild(e);
+        }
+        for(var d=1;d<=days;d++){
+            var cell=document.createElement('div');
+            var isToday = (d===today.getDate() && month===today.getMonth() && year===today.getFullYear());
+            cell.className='bg-base-100 p-2 min-h-[80px]'+(isToday?' ring-2 ring-primary ring-inset':'');
+            var num=document.createElement('div');
+            num.className='text-sm font-medium'+(isToday?' text-primary font-bold':'');
+            num.textContent=d;
+            cell.appendChild(num);
+            // Events
+            for(var j=0;j<events.length;j++){
+                if(events[j].day===d){
+                    var ev=document.createElement('div');
+                    ev.className='text-xs rounded px-1 py-0.5 mt-1 truncate '+events[j].theme;
+                    ev.textContent=events[j].title;
+                    cell.appendChild(ev);
+                }
+            }
+            grid.appendChild(cell);
+        }
+    }
+
+    window.calPrev=function(){month--;if(month<0){month=11;year--;}render();};
+    window.calNext=function(){month++;if(month>11){month=0;year++;}render();};
+    window.calToday=function(){var t=new Date();year=t.getFullYear();month=t.getMonth();render();};
+    render();
+})();
+</script>
+{{end}}

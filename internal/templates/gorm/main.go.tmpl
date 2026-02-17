@@ -72,12 +72,15 @@ func main() {
 	// 정적 파일
 	r.Handle("/assets/*", http.FileServer(http.FS(content)))
 
-	// 메인 페이지 → 첫 번째 모델 리스트로 리다이렉트
+	// Dashboard base handler
+	baseHandler := handlers.NewBaseHandler(tmpl)
+
+	// 메인 페이지 → 대시보드로 리다이렉트
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-{{- if .Models}}
-		http.Redirect(w, r, "/{{(index .Models 0).NameSnake}}s/ui/list", http.StatusFound)
+{{- if .HasRBAC}}
+		http.Redirect(w, r, "/login", http.StatusFound)
 {{- else}}
-		w.Write([]byte("Welcome to {{.ProjectName}}"))
+		http.Redirect(w, r, "/dashboard", http.StatusFound)
 {{- end}}
 	})
 
@@ -86,8 +89,47 @@ func main() {
 	authHandler := handlers.NewAuthHandler(db, tmpl, "{{.RBAC.JWTSecret}}")
 	r.Get("/login", authHandler.LoginPage)
 	r.Post("/api/auth/login", authHandler.Login)
+	r.Get("/register", authHandler.RegisterPage)
 	r.Post("/api/auth/register", authHandler.Register)
+	r.Get("/forgot-password", authHandler.ForgotPasswordPage)
+	r.Post("/api/auth/forgot-password", authHandler.ForgotPassword)
 	r.Get("/logout", authHandler.Logout)
+{{- end}}
+
+	// Dashboard routes
+{{- if .HasRBAC}}
+	r.Route("/dashboard", func(r chi.Router) {
+		r.Use(mw.JWTAuth("{{.RBAC.JWTSecret}}"))
+		r.Get("/", baseHandler.Dashboard)
+		r.Get("/leads", baseHandler.Leads)
+		r.Get("/transactions", baseHandler.Transactions)
+		r.Get("/charts", baseHandler.Charts)
+		r.Get("/integration", baseHandler.Integration)
+		r.Get("/calendar", baseHandler.Calendar)
+		r.Get("/profile", baseHandler.ProfileSettings)
+		r.Post("/profile", baseHandler.ProfileSettingsUpdate)
+		r.Get("/team", baseHandler.Team)
+		r.Get("/billing", baseHandler.Billing)
+		r.Get("/welcome", baseHandler.Welcome)
+		r.Get("/blank", baseHandler.Blank)
+		r.Get("/404", baseHandler.NotFound)
+	})
+{{- else}}
+	r.Route("/dashboard", func(r chi.Router) {
+		r.Get("/", baseHandler.Dashboard)
+		r.Get("/leads", baseHandler.Leads)
+		r.Get("/transactions", baseHandler.Transactions)
+		r.Get("/charts", baseHandler.Charts)
+		r.Get("/integration", baseHandler.Integration)
+		r.Get("/calendar", baseHandler.Calendar)
+		r.Get("/profile", baseHandler.ProfileSettings)
+		r.Post("/profile", baseHandler.ProfileSettingsUpdate)
+		r.Get("/team", baseHandler.Team)
+		r.Get("/billing", baseHandler.Billing)
+		r.Get("/welcome", baseHandler.Welcome)
+		r.Get("/blank", baseHandler.Blank)
+		r.Get("/404", baseHandler.NotFound)
+	})
 {{- end}}
 
 	// Model routes

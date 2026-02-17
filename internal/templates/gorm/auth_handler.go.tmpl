@@ -74,6 +74,11 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+// RegisterPage renders the register form
+func (h *AuthHandler) RegisterPage(w http.ResponseWriter, r *http.Request) {
+	h.tmpl.ExecuteTemplate(w, "register.html", nil)
+}
+
 // Register creates a new user
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
@@ -98,13 +103,27 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.db.Create(&user).Error; err != nil {
-		h.tmpl.ExecuteTemplate(w, "login.html", map[string]interface{}{
+		h.tmpl.ExecuteTemplate(w, "register.html", map[string]interface{}{
 			"Error": "등록 실패: " + err.Error(),
 		})
 		return
 	}
 
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
+}
+
+// ForgotPasswordPage renders the forgot password form
+func (h *AuthHandler) ForgotPasswordPage(w http.ResponseWriter, r *http.Request) {
+	h.tmpl.ExecuteTemplate(w, "forgot_password.html", nil)
+}
+
+// ForgotPassword handles the forgot password form submission
+func (h *AuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	// In production, send email with reset link
+	h.tmpl.ExecuteTemplate(w, "forgot_password.html", map[string]interface{}{
+		"Success": "비밀번호 재설정 링크가 이메일로 전송되었습니다.",
+	})
 }
 
 // Logout clears the token cookie

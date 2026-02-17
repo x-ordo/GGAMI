@@ -8,8 +8,8 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 
-	"ggami/api"
-	"ggami/internal/builder"
+	"ggami-go/api"
+	"ggami-go/internal/builder"
 )
 
 //go:embed all:frontend
@@ -21,7 +21,7 @@ func main() {
 	handler := api.NewHandler(pm)
 
 	err := wails.Run(&options.App{
-		Title:  "까미 빌더",
+		Title:  "까미GO빌더",
 		Width:  1400,
 		Height: 900,
 		AssetServer: &assetserver.Options{

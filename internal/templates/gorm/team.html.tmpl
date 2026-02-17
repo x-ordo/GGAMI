@@ -1,0 +1,44 @@
+{{define "content"}}
+<div class="card bg-base-100 shadow-sm">
+    <div class="card-body">
+        <div class="flex justify-between items-center">
+            <h2 class="card-title">Active Members</h2>
+            <button class="btn btn-primary btn-sm">Invite New</button>
+        </div>
+        <div class="divider mt-2"></div>
+        <div class="overflow-x-auto">
+            <table class="table w-full">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Joined On</th>
+                        <th>Role</th>
+                        <th>Last Active</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .Members}}
+                    <tr>
+                        <td>
+                            <div class="flex items-center gap-3">
+                                <div class="avatar placeholder">
+                                    <div class="bg-neutral text-neutral-content mask mask-circle w-8">
+                                        <span class="text-sm">{{.Avatar}}</span>
+                                    </div>
+                                </div>
+                                <span class="font-bold">{{.Name}}</span>
+                            </div>
+                        </td>
+                        <td>{{.Email}}</td>
+                        <td>{{.JoinedOn}}</td>
+                        <td><span class="badge {{.Badge}}">{{.Role}}</span></td>
+                        <td>{{.LastActive}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{{end}}

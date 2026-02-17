@@ -1,0 +1,128 @@
+{{define "content"}}
+<div class="grid lg:grid-cols-2 grid-cols-1 gap-4 mb-6">
+    <div class="card bg-base-100 shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title text-base">Stacked Bar Chart - Sales</h2>
+            <div class="divider mt-0 mb-0"></div>
+            <canvas id="stackBarChart" height="200"></canvas>
+        </div>
+    </div>
+    <div class="card bg-base-100 shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title text-base">Bar Chart - Orders</h2>
+            <div class="divider mt-0 mb-0"></div>
+            <canvas id="barChart" height="200"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="grid lg:grid-cols-2 grid-cols-1 gap-4 mb-6">
+    <div class="card bg-base-100 shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title text-base">Doughnut Chart</h2>
+            <div class="divider mt-0 mb-0"></div>
+            <canvas id="doughnutChart" height="200"></canvas>
+        </div>
+    </div>
+    <div class="card bg-base-100 shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title text-base">Pie Chart</h2>
+            <div class="divider mt-0 mb-0"></div>
+            <canvas id="pieChart" height="200"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="grid lg:grid-cols-2 grid-cols-1 gap-4">
+    <div class="card bg-base-100 shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title text-base">Scatter Chart</h2>
+            <div class="divider mt-0 mb-0"></div>
+            <canvas id="scatterChart" height="200"></canvas>
+        </div>
+    </div>
+    <div class="card bg-base-100 shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title text-base">Line Chart - MAU</h2>
+            <div class="divider mt-0 mb-0"></div>
+            <canvas id="lineChart" height="200"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script>
+const labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// Stacked Bar
+new Chart(document.getElementById('stackBarChart'), {
+    type: 'bar',
+    data: {
+        labels: labels,
+        datasets: [
+            { label: 'Store 1', data: [10,15,20,25,18,22,30,28,35,32,40,38], backgroundColor: 'oklch(var(--p) / 0.8)' },
+            { label: 'Store 2', data: [8,12,15,20,14,18,25,22,28,26,32,30], backgroundColor: 'oklch(var(--s) / 0.8)' },
+            { label: 'Store 3', data: [5,8,10,15,10,12,18,15,20,18,24,22], backgroundColor: 'oklch(var(--a) / 0.8)' }
+        ]
+    },
+    options: { responsive: true, scales: { x: { stacked: true }, y: { stacked: true } } }
+});
+
+// Bar
+new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+        labels: labels,
+        datasets: [
+            { label: 'Store 1', data: [32,28,35,40,38,42,45,50,48,55,52,60], backgroundColor: 'oklch(var(--p) / 0.7)' },
+            { label: 'Store 2', data: [25,22,28,32,30,35,38,42,40,45,43,50], backgroundColor: 'oklch(var(--s) / 0.7)' }
+        ]
+    },
+    options: { responsive: true }
+});
+
+// Doughnut
+new Chart(document.getElementById('doughnutChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Electronics','Home Appliances','Beauty','Furniture','Watches','Apparel'],
+        datasets: [{ data: [122,219,30,51,82,13], backgroundColor: ['oklch(var(--p))','oklch(var(--s))','oklch(var(--a))','oklch(var(--n))','oklch(var(--in))','oklch(var(--wa))'] }]
+    },
+    options: { responsive: true, cutout: '60%' }
+});
+
+// Pie
+new Chart(document.getElementById('pieChart'), {
+    type: 'pie',
+    data: {
+        labels: ['India','Middle East','Europe','US','Latin America','Asia'],
+        datasets: [{ data: [42,35,25,18,12,8], backgroundColor: ['oklch(var(--p))','oklch(var(--s))','oklch(var(--a))','oklch(var(--n))','oklch(var(--in))','oklch(var(--wa))'] }]
+    },
+    options: { responsive: true }
+});
+
+// Scatter
+(function(){
+    var d1=[],d2=[];
+    for(var i=0;i<50;i++){d1.push({x:Math.random()*100,y:Math.random()*100+1000});d2.push({x:Math.random()*100,y:Math.random()*100+2000});}
+    new Chart(document.getElementById('scatterChart'),{
+        type:'scatter',
+        data:{datasets:[
+            {label:'Orders >1k',data:d1,backgroundColor:'oklch(var(--p) / 0.6)'},
+            {label:'Orders >2k',data:d2,backgroundColor:'oklch(var(--s) / 0.6)'}
+        ]},
+        options:{responsive:true}
+    });
+})();
+
+// Line
+new Chart(document.getElementById('lineChart'), {
+    type: 'line',
+    data: {
+        labels: labels,
+        datasets: [{ label: 'MAU', data: [26,20,30,22,17,29,32,27,35,40,38,42], borderColor: 'oklch(var(--p))', backgroundColor: 'oklch(var(--p) / 0.1)', fill: true, tension: 0.3 }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } } }
+});
+</script>
+{{end}}

@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"ggami/internal/builder"
+	"ggami-go/internal/builder"
 )
 
 // NewHandler creates a Chi router for HTMX partial HTML responses

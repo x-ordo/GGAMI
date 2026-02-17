@@ -1,6 +1,6 @@
 package generator
 
-import "ggami/internal/domain"
+import "ggami-go/internal/domain"
 
 // Type aliases for backward compatibility
 type FieldDef = domain.FieldDef

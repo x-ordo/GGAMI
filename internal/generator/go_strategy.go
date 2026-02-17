@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"ggami/internal/modules"
-	"ggami/internal/templates"
+	"ggami-go/internal/modules"
+	"ggami-go/internal/templates"
 )
 
 // GoGenerator implements the Generator interface for Go projects

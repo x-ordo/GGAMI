@@ -3,7 +3,7 @@ package application
 import (
 	"fmt"
 
-	"ggami/internal/domain"
+	"ggami-go/internal/domain"
 )
 
 // ResolveDependencies resolves module dependencies using topological sort (Kahn's algorithm).

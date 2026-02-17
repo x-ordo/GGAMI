@@ -1,4 +1,4 @@
-module ggami
+module ggami-go
 
 go 1.25.0
 

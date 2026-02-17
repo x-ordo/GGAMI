@@ -7,9 +7,9 @@ import (
 	"regexp"
 	"strings"
 
-	"ggami/internal/domain"
-	"ggami/internal/generator"
-	"ggami/internal/modules"
+	"ggami-go/internal/domain"
+	"ggami-go/internal/generator"
+	"ggami-go/internal/modules"
 )
 
 // --- Step 1: ValidateConfigStep ---

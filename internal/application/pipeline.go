@@ -3,7 +3,7 @@ package application
 import (
 	"fmt"
 
-	"ggami/internal/domain"
+	"ggami-go/internal/domain"
 )
 
 // PipelineStep defines a single step in the generation pipeline

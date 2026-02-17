@@ -1,0 +1,182 @@
+package handlers
+
+import (
+	"html/template"
+	"net/http"
+)
+
+// BaseHandler handles dashboard base pages
+type BaseHandler struct {
+	tmpl *template.Template
+}
+
+// NewBaseHandler creates a new base handler
+func NewBaseHandler(tmpl *template.Template) *BaseHandler {
+	return &BaseHandler{tmpl: tmpl}
+}
+
+func (h *BaseHandler) render(w http.ResponseWriter, name string, data map[string]interface{}) {
+	if data == nil {
+		data = map[string]interface{}{}
+	}
+	h.tmpl.ExecuteTemplate(w, name, data)
+}
+
+// Dashboard renders the main dashboard page
+func (h *BaseHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
+	data := map[string]interface{}{
+		"PageTitle": "Dashboard",
+		"Stats": []map[string]string{
+			{"Title": "New Users", "Value": "34.7k", "Desc": "↗︎ 2,300 (22%)", "Icon": "users"},
+			{"Title": "Total Sales", "Value": "$34,545", "Desc": "Current month", "Icon": "credit-card"},
+			{"Title": "Pending Leads", "Value": "450", "Desc": "50 in hot leads", "Icon": "stack"},
+			{"Title": "Active Users", "Value": "5.6k", "Desc": "↙ 300 (18%)", "Icon": "user-group"},
+		},
+		"AmountStats": []map[string]string{
+			{"Title": "Revenue this month", "Value": "$5,600", "Icon": "dollar", "Desc": "↗︎ 2,300 (22%)"},
+			{"Title": "Revenue last month", "Value": "$4,850", "Icon": "dollar", "Desc": "Current month"},
+		},
+		"PageStats": []map[string]string{
+			{"Title": "Total Page Views", "Value": "2.6M", "Desc": "↗︎ 22% vs last month"},
+			{"Title": "Conversion Rate", "Value": "3.2%", "Desc": "↗︎ 0.5% vs last month"},
+		},
+		"UserChannels": []map[string]string{
+			{"Source": "Organic Search", "Users": "5,649", "Conversion": "12.3%"},
+			{"Source": "Paid Search", "Users": "2,245", "Conversion": "8.7%"},
+			{"Source": "Direct", "Users": "1,856", "Conversion": "15.2%"},
+			{"Source": "Social Media", "Users": "1,350", "Conversion": "6.8%"},
+			{"Source": "Referral", "Users": "980", "Conversion": "18.5%"},
+			{"Source": "Email", "Users": "750", "Conversion": "22.1%"},
+		},
+	}
+	h.render(w, "dashboard.html", data)
+}
+
+// Leads renders the leads page
+func (h *BaseHandler) Leads(w http.ResponseWriter, r *http.Request) {
+	data := map[string]interface{}{
+		"PageTitle": "Leads",
+		"Leads": []map[string]string{
+			{"Name": "Alex", "Avatar": "A", "Email": "alex@example.com", "Status": "In Progress", "Badge": "badge-primary", "CreatedAt": "2024-01-15", "AssignedTo": "Admin"},
+			{"Name": "Ereena", "Avatar": "E", "Email": "ereena@example.com", "Status": "Sold", "Badge": "badge-secondary", "CreatedAt": "2024-01-12", "AssignedTo": "Manager"},
+			{"Name": "John", "Avatar": "J", "Email": "john@example.com", "Status": "Not Interested", "Badge": "badge-ghost", "CreatedAt": "2024-01-10", "AssignedTo": "Admin"},
+			{"Name": "Matrix", "Avatar": "M", "Email": "matrix@example.com", "Status": "Need Followup", "Badge": "badge-accent", "CreatedAt": "2024-01-08", "AssignedTo": "Support"},
+			{"Name": "Virat", "Avatar": "V", "Email": "virat@example.com", "Status": "Open", "Badge": "badge-info", "CreatedAt": "2024-01-05", "AssignedTo": "Manager"},
+			{"Name": "Miya", "Avatar": "M", "Email": "miya@example.com", "Status": "In Progress", "Badge": "badge-primary", "CreatedAt": "2024-01-03", "AssignedTo": "Support"},
+		},
+	}
+	h.render(w, "leads.html", data)
+}
+
+// Transactions renders the transactions page
+func (h *BaseHandler) Transactions(w http.ResponseWriter, r *http.Request) {
+	data := map[string]interface{}{
+		"PageTitle": "Transactions",
+		"Transactions": []map[string]string{
+			{"Name": "Alex", "Avatar": "A", "Email": "alex@example.com", "Location": "Paris", "Amount": "$2,500", "Date": "2024-01-15"},
+			{"Name": "Ereena", "Avatar": "E", "Email": "ereena@example.com", "Location": "London", "Amount": "$1,850", "Date": "2024-01-14"},
+			{"Name": "John", "Avatar": "J", "Email": "john@example.com", "Location": "Canada", "Amount": "$3,200", "Date": "2024-01-13"},
+			{"Name": "Matrix", "Avatar": "M", "Email": "matrix@example.com", "Location": "Peru", "Amount": "$950", "Date": "2024-01-12"},
+			{"Name": "Virat", "Avatar": "V", "Email": "virat@example.com", "Location": "Tokyo", "Amount": "$4,100", "Date": "2024-01-11"},
+			{"Name": "Miya", "Avatar": "M", "Email": "miya@example.com", "Location": "US", "Amount": "$1,600", "Date": "2024-01-10"},
+			{"Name": "Dave", "Avatar": "D", "Email": "dave@example.com", "Location": "London", "Amount": "$2,750", "Date": "2024-01-09"},
+			{"Name": "Sara", "Avatar": "S", "Email": "sara@example.com", "Location": "Paris", "Amount": "$890", "Date": "2024-01-08"},
+		},
+	}
+	h.render(w, "transactions.html", data)
+}
+
+// Charts renders the charts page
+func (h *BaseHandler) Charts(w http.ResponseWriter, r *http.Request) {
+	h.render(w, "charts.html", map[string]interface{}{"PageTitle": "Analytics"})
+}
+
+// Integration renders the integration page
+func (h *BaseHandler) Integration(w http.ResponseWriter, r *http.Request) {
+	data := map[string]interface{}{
+		"PageTitle": "Integration",
+		"Integrations": []map[string]interface{}{
+			{"Name": "Slack", "Desc": "Integrate Slack for team notifications and alerts in real-time.", "Icon": "https://cdn-icons-png.flaticon.com/512/2111/2111615.png", "Active": true},
+			{"Name": "Facebook", "Desc": "Connect Facebook for social media analytics and engagement tracking.", "Icon": "https://cdn-icons-png.flaticon.com/512/124/124010.png", "Active": false},
+			{"Name": "LinkedIn", "Desc": "LinkedIn integration for professional networking and lead generation.", "Icon": "https://cdn-icons-png.flaticon.com/512/3536/3536505.png", "Active": true},
+			{"Name": "Google Ads", "Desc": "Google Ads integration for campaign management and ROI tracking.", "Icon": "https://cdn-icons-png.flaticon.com/512/2991/2991148.png", "Active": false},
+			{"Name": "Gmail", "Desc": "Gmail integration for email automation and customer communication.", "Icon": "https://cdn-icons-png.flaticon.com/512/281/281769.png", "Active": false},
+			{"Name": "Salesforce", "Desc": "Salesforce CRM integration for complete customer lifecycle management.", "Icon": "https://cdn-icons-png.flaticon.com/512/5968/5968914.png", "Active": false},
+		},
+	}
+	h.render(w, "integration.html", data)
+}
+
+// Calendar renders the calendar page
+func (h *BaseHandler) Calendar(w http.ResponseWriter, r *http.Request) {
+	h.render(w, "calendar.html", map[string]interface{}{"PageTitle": "Calendar"})
+}
+
+// ProfileSettings renders profile settings (GET)
+func (h *BaseHandler) ProfileSettings(w http.ResponseWriter, r *http.Request) {
+	data := map[string]interface{}{
+		"PageTitle": "Profile Settings",
+		"Profile": map[string]string{
+			"Name":     "Alex",
+			"Email":    "alex@example.com",
+			"Title":    "UI/UX Designer",
+			"Place":    "California",
+			"About":    "Doing what I love, part time traveller",
+			"Language": "English",
+			"Timezone": "KST (UTC+9)",
+		},
+	}
+	h.render(w, "profile_settings.html", data)
+}
+
+// ProfileSettingsUpdate handles profile update (POST)
+func (h *BaseHandler) ProfileSettingsUpdate(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "/dashboard/profile", http.StatusSeeOther)
+}
+
+// Team renders the team page
+func (h *BaseHandler) Team(w http.ResponseWriter, r *http.Request) {
+	data := map[string]interface{}{
+		"PageTitle": "Team Members",
+		"Members": []map[string]string{
+			{"Name": "Alex", "Avatar": "A", "Email": "alex@example.com", "Role": "Owner", "Badge": "badge-primary", "JoinedOn": "2023-06-15", "LastActive": "5 min ago"},
+			{"Name": "Ereena", "Avatar": "E", "Email": "ereena@example.com", "Role": "Admin", "Badge": "badge-secondary", "JoinedOn": "2023-07-20", "LastActive": "15 min ago"},
+			{"Name": "John", "Avatar": "J", "Email": "john@example.com", "Role": "Admin", "Badge": "badge-secondary", "JoinedOn": "2023-08-10", "LastActive": "1 hr ago"},
+			{"Name": "Matrix", "Avatar": "M", "Email": "matrix@example.com", "Role": "Manager", "Badge": "badge-accent", "JoinedOn": "2023-09-05", "LastActive": "2 hrs ago"},
+			{"Name": "Virat", "Avatar": "V", "Email": "virat@example.com", "Role": "Support", "Badge": "badge-ghost", "JoinedOn": "2023-10-12", "LastActive": "3 hrs ago"},
+			{"Name": "Miya", "Avatar": "M", "Email": "miya@example.com", "Role": "Support", "Badge": "badge-ghost", "JoinedOn": "2023-11-01", "LastActive": "5 hrs ago"},
+		},
+	}
+	h.render(w, "team.html", data)
+}
+
+// Billing renders the billing page
+func (h *BaseHandler) Billing(w http.ResponseWriter, r *http.Request) {
+	data := map[string]interface{}{
+		"PageTitle": "Billing",
+		"Bills": []map[string]string{
+			{"InvoiceNo": "INV-2024-001", "Amount": "$1,250", "Desc": "Product usages", "Status": "Pending", "Badge": "badge-primary", "GeneratedOn": "2024-01-15", "PaidOn": "-"},
+			{"InvoiceNo": "INV-2024-002", "Amount": "$890", "Desc": "Product usages", "Status": "Pending", "Badge": "badge-primary", "GeneratedOn": "2024-01-10", "PaidOn": "-"},
+			{"InvoiceNo": "INV-2023-012", "Amount": "$1,100", "Desc": "Product usages", "Status": "Paid", "Badge": "badge-success", "GeneratedOn": "2023-12-15", "PaidOn": "2023-12-20"},
+			{"InvoiceNo": "INV-2023-011", "Amount": "$950", "Desc": "Product usages", "Status": "Paid", "Badge": "badge-success", "GeneratedOn": "2023-11-15", "PaidOn": "2023-11-18"},
+			{"InvoiceNo": "INV-2023-010", "Amount": "$1,300", "Desc": "Product usages", "Status": "Paid", "Badge": "badge-success", "GeneratedOn": "2023-10-15", "PaidOn": "2023-10-20"},
+			{"InvoiceNo": "INV-2023-009", "Amount": "$750", "Desc": "Product usages", "Status": "Paid", "Badge": "badge-success", "GeneratedOn": "2023-09-15", "PaidOn": "2023-09-17"},
+		},
+	}
+	h.render(w, "billing.html", data)
+}
+
+// Welcome renders the welcome page
+func (h *BaseHandler) Welcome(w http.ResponseWriter, r *http.Request) {
+	h.render(w, "welcome.html", map[string]interface{}{"PageTitle": "Welcome"})
+}
+
+// Blank renders a blank page
+func (h *BaseHandler) Blank(w http.ResponseWriter, r *http.Request) {
+	h.render(w, "blank.html", map[string]interface{}{"PageTitle": "Blank"})
+}
+
+// NotFound renders the 404 page
+func (h *BaseHandler) NotFound(w http.ResponseWriter, r *http.Request) {
+	h.render(w, "404.html", map[string]interface{}{"PageTitle": "Page Not Found"})
+}

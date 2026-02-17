@@ -1,6 +1,6 @@
 package application
 
-import "ggami/internal/domain"
+import "ggami-go/internal/domain"
 
 // GenerateProject orchestrates the full project generation using the pipeline
 func GenerateProject(config domain.ProjectConfig, language string) (string, error) {
