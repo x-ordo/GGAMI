@@ -70,6 +70,14 @@ func (g *GoGenerator) GenerateCode(config ProjectConfig) error {
 	indexHTML := templates.HTMLIndexTemplate()
 	indexHTML = strings.ReplaceAll(indexHTML, "{{PROJECT_NAME}}", config.ProjectName)
 
+	// Read go.mod for potential module injection
+	goModPath := filepath.Join(config.TargetPath, "go.mod")
+	goModBytes, err := os.ReadFile(goModPath)
+	if err != nil {
+		return err
+	}
+	goMod := string(goModBytes)
+
 	// Module injection
 	activeModules := filterActiveModules(config.Modules)
 
@@ -80,6 +88,8 @@ func (g *GoGenerator) GenerateCode(config ProjectConfig) error {
 				mainGo = strings.Replace(mainGo, snippet.Marker, snippet.Content+"\n"+snippet.Marker, 1)
 			case modules.TargetIndexHTML:
 				indexHTML = strings.Replace(indexHTML, snippet.Marker, snippet.Content+"\n"+snippet.Marker, 1)
+			case modules.TargetGoMod:
+				goMod = strings.Replace(goMod, snippet.Marker, snippet.Content+"\n"+snippet.Marker, 1)
 			}
 		}
 	}
@@ -91,19 +101,33 @@ func (g *GoGenerator) GenerateCode(config ProjectConfig) error {
 	if err := os.WriteFile(filepath.Join(config.TargetPath, "templates", "index.html"), []byte(indexHTML), 0644); err != nil {
 		return err
 	}
+	if err := os.WriteFile(goModPath, []byte(goMod), 0644); err != nil {
+		return err
+	}
 
 	return nil
 }
 
+// ScaffoldGorm creates the directory structure for a GORM project
+func ScaffoldGorm(path string) error {
+	return (&GoGenerator{}).scaffoldGorm(path)
+}
+
+// GenerateLegacyCode generates legacy (non-GORM) Go project files with module injection.
+// This is the code generation portion only — scaffold and manifest must be done separately.
+func GenerateLegacyCode(config ProjectConfig) error {
+	return (&GoGenerator{}).GenerateCode(config)
+}
+
 func filterActiveModules(selectedIDs []string) []modules.ModuleDef {
-	idSet := make(map[string]bool)
-	for _, id := range selectedIDs {
-		idSet[id] = true
+	byID := make(map[string]modules.ModuleDef)
+	for _, mod := range modules.Registry {
+		byID[mod.ID] = mod
 	}
 
 	var active []modules.ModuleDef
-	for _, mod := range modules.Registry {
-		if idSet[mod.ID] {
+	for _, id := range selectedIDs {
+		if mod, ok := byID[id]; ok {
 			active = append(active, mod)
 		}
 	}

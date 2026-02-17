@@ -6,6 +6,7 @@ import (
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 
+	"ggami/internal/application"
 	"ggami/internal/builder"
 	"ggami/internal/generator"
 	"ggami/internal/modules"
@@ -48,7 +49,7 @@ func (a *App) GetModules() []modules.ModuleDef {
 
 // GenerateProject generates a project with the given config and language
 func (a *App) GenerateProject(config generator.ProjectConfig, lang string) map[string]interface{} {
-	result, err := generator.GenerateProject(config, lang)
+	result, err := application.GenerateProject(config, lang)
 	if err != nil {
 		return map[string]interface{}{
 			"success": false,

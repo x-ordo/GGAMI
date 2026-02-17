@@ -1,26 +1,15 @@
 package modules
 
-// InjectionTarget specifies which file a code snippet targets
-type InjectionTarget string
+import "ggami/internal/domain"
 
+// Type aliases for backward compatibility
+type InjectionTarget = domain.InjectionTarget
+type CodeSnippet = domain.CodeSnippet
+type ModuleDef = domain.ModuleDef
+
+// Re-export constants
 const (
-	TargetMainGo    InjectionTarget = "main.go"
-	TargetGoMod     InjectionTarget = "go.mod"
-	TargetIndexHTML  InjectionTarget = "index.html"
+	TargetMainGo   = domain.TargetMainGo
+	TargetGoMod    = domain.TargetGoMod
+	TargetIndexHTML = domain.TargetIndexHTML
 )
-
-// CodeSnippet represents a piece of code to inject at a marker
-type CodeSnippet struct {
-	Target  InjectionTarget `json:"target"`
-	Marker  string          `json:"marker"`
-	Content string          `json:"content"`
-}
-
-// ModuleDef defines a pluggable module with injectable code
-type ModuleDef struct {
-	ID          string        `json:"id"`
-	Name        string        `json:"name"`
-	Description string        `json:"description"`
-	Category    string        `json:"category"` // "feature", "ui", "utils"
-	Snippets    []CodeSnippet `json:"snippets"`
-}

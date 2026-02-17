@@ -1,22 +1,9 @@
 package generator
 
-// ProjectConfig holds all configuration for project generation
-type ProjectConfig struct {
-	ProjectName string   `json:"projectName"`
-	TargetPath  string   `json:"targetPath"`
-	DBServer    string   `json:"dbServer"`
-	DBUser      string   `json:"dbUser"`
-	DBPw        string   `json:"dbPw"`
-	DBName      string   `json:"dbName"`
-	Port        int      `json:"port,omitempty"`
-	Modules     []string `json:"modules"`
+import "ggami/internal/domain"
 
-	// GORM full-stack generation fields
-	GormMode bool       `json:"gormMode,omitempty"`
-	Models   []ModelDef `json:"models,omitempty"`
-	DBType   DBType     `json:"dbType,omitempty"`
-	RBAC     *RBACConfig `json:"rbac,omitempty"`
-}
+// Type aliases for backward compatibility
+type ProjectConfig = domain.ProjectConfig
 
 // Generator interface defines the contract for code generators
 type Generator interface {

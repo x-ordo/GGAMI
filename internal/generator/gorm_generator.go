@@ -91,6 +91,117 @@ func (g *GormCodeGenerator) Generate(config ProjectConfig) error {
 	return nil
 }
 
+// RenderModels generates GORM model files (models/*.go)
+func RenderModels(config ProjectConfig) error {
+	g := &GormCodeGenerator{}
+	data := buildTemplateData(config)
+
+	for _, model := range data.Models {
+		modelData := struct {
+			TemplateData
+			Model ModelTmplData
+		}{data, model}
+
+		modelFile := strings.ToLower(model.Name) + ".go"
+		if err := g.renderGoFile(filepath.Join(config.TargetPath, "models"), modelFile, "model.go.tmpl", modelData); err != nil {
+			return fmt.Errorf("model %s: %w", model.Name, err)
+		}
+	}
+	return nil
+}
+
+// RenderHandlers generates handler files (handlers/*.go + helpers.go)
+func RenderHandlers(config ProjectConfig) error {
+	g := &GormCodeGenerator{}
+	data := buildTemplateData(config)
+	if config.Port > 0 {
+		data.Port = fmt.Sprintf("%d", config.Port)
+	} else {
+		data.Port = "8080"
+	}
+
+	// main.go and go.mod
+	if err := g.renderGoFile(config.TargetPath, "main.go", "main.go.tmpl", data); err != nil {
+		return fmt.Errorf("main.go: %w", err)
+	}
+	if err := g.renderGoFile(config.TargetPath, "go.mod", "go_mod.go.tmpl", data); err != nil {
+		return fmt.Errorf("go.mod: %w", err)
+	}
+	// Helpers
+	if err := g.renderGoFile(filepath.Join(config.TargetPath, "handlers"), "helpers.go", "helpers.go.tmpl", data); err != nil {
+		return fmt.Errorf("helpers.go: %w", err)
+	}
+
+	for _, model := range data.Models {
+		modelData := struct {
+			TemplateData
+			Model ModelTmplData
+		}{data, model}
+
+		handlerFile := strings.ToLower(model.Name) + ".go"
+		if err := g.renderGoFile(filepath.Join(config.TargetPath, "handlers"), handlerFile, "handler.go.tmpl", modelData); err != nil {
+			return fmt.Errorf("handler %s: %w", model.Name, err)
+		}
+	}
+	return nil
+}
+
+// RenderHTMLTemplates generates HTML template files (templates/*.html)
+func RenderHTMLTemplates(config ProjectConfig) error {
+	g := &GormCodeGenerator{}
+	data := buildTemplateData(config)
+
+	if err := g.renderHTMLFile(filepath.Join(config.TargetPath, "templates"), "layout.html", "layout.html.tmpl", data); err != nil {
+		return fmt.Errorf("layout.html: %w", err)
+	}
+
+	for _, model := range data.Models {
+		modelData := struct {
+			TemplateData
+			Model ModelTmplData
+		}{data, model}
+
+		listFile := strings.ToLower(model.Name) + "_list.html"
+		if err := g.renderHTMLFile(filepath.Join(config.TargetPath, "templates"), listFile, "list.html.tmpl", modelData); err != nil {
+			return fmt.Errorf("list template %s: %w", model.Name, err)
+		}
+
+		formFile := strings.ToLower(model.Name) + "_form.html"
+		if err := g.renderHTMLFile(filepath.Join(config.TargetPath, "templates"), formFile, "form.html.tmpl", modelData); err != nil {
+			return fmt.Errorf("form template %s: %w", model.Name, err)
+		}
+	}
+	return nil
+}
+
+// RenderMiddleware generates RBAC middleware and auth files
+func RenderMiddleware(config ProjectConfig) error {
+	g := &GormCodeGenerator{}
+	data := buildTemplateData(config)
+	if config.Port > 0 {
+		data.Port = fmt.Sprintf("%d", config.Port)
+	} else {
+		data.Port = "8080"
+	}
+
+	if err := g.renderGoFile(filepath.Join(config.TargetPath, "models"), "user.go", "user_model.go.tmpl", data); err != nil {
+		return fmt.Errorf("user model: %w", err)
+	}
+	if err := g.renderGoFile(filepath.Join(config.TargetPath, "middleware"), "auth.go", "middleware_auth.go.tmpl", data); err != nil {
+		return fmt.Errorf("middleware auth: %w", err)
+	}
+	if err := g.renderGoFile(filepath.Join(config.TargetPath, "middleware"), "rbac.go", "middleware_rbac.go.tmpl", data); err != nil {
+		return fmt.Errorf("middleware rbac: %w", err)
+	}
+	if err := g.renderGoFile(filepath.Join(config.TargetPath, "handlers"), "auth.go", "auth_handler.go.tmpl", data); err != nil {
+		return fmt.Errorf("auth handler: %w", err)
+	}
+	if err := g.renderHTMLFile(filepath.Join(config.TargetPath, "templates"), "login.html", "login.html.tmpl", data); err != nil {
+		return fmt.Errorf("login template: %w", err)
+	}
+	return nil
+}
+
 // renderGoFile renders a Go source template using standard {{ }} delimiters
 func (g *GormCodeGenerator) renderGoFile(dir, filename, tmplName string, data interface{}) error {
 	content, err := gormtmpl.FS.ReadFile(tmplName)

@@ -3,10 +3,11 @@ package modules
 // Registry contains all available modules
 var Registry = []ModuleDef{
 	{
-		ID:          "auth-login",
-		Name:        "Simple Login Form",
-		Description: "Basic username/password login form with HTMX.",
-		Category:    "feature",
+		ID:           "auth-login",
+		Name:         "Simple Login Form",
+		Description:  "Basic username/password login form with HTMX.",
+		Category:     "feature",
+		Dependencies: []string{},
 		Snippets: []CodeSnippet{
 			{
 				Target: TargetIndexHTML,
@@ -46,10 +47,11 @@ var Registry = []ModuleDef{
 		},
 	},
 	{
-		ID:          "ui-hero",
-		Name:        "Modern Hero Section",
-		Description: "A large hero banner with call to action.",
-		Category:    "ui",
+		ID:           "ui-hero",
+		Name:         "Modern Hero Section",
+		Description:  "A large hero banner with call to action.",
+		Category:     "ui",
+		Dependencies: []string{},
 		Snippets: []CodeSnippet{
 			{
 				Target: TargetIndexHTML,
