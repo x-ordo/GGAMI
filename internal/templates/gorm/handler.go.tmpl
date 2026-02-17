@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"{{.ProjectName}}/models"
@@ -21,7 +22,7 @@ func New{{.Model.Name}}Handler(db *gorm.DB, tmpl *template.Template) *{{.Model.N
 	return &{{.Model.Name}}Handler{db: db, tmpl: tmpl}
 }
 
-// ListPage renders the HTML list page
+// ListPage renders the HTML list page with search, sort, pagination
 func (h *{{.Model.Name}}Handler) ListPage(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 	if page < 1 {
@@ -30,10 +31,48 @@ func (h *{{.Model.Name}}Handler) ListPage(w http.ResponseWriter, r *http.Request
 	perPage := 20
 	offset := (page - 1) * perPage
 
-	var items []models.{{.Model.Name}}
+	query := h.db.Model(&models.{{.Model.Name}}{})
+
+	// 검색
+	q := strings.TrimSpace(r.URL.Query().Get("q"))
+	if q != "" {
+		searchQ := "%" + q + "%"
+		var conditions []string
+		var args []interface{}
+{{- range .Model.Fields}}
+{{- if eq .Type "string"}}
+		conditions = append(conditions, "{{.JsonName}} LIKE ?")
+		args = append(args, searchQ)
+{{- end}}
+{{- end}}
+		if len(conditions) > 0 {
+			query = query.Where(strings.Join(conditions, " OR "), args...)
+		}
+	}
+
+	// 정렬
+	sortField := r.URL.Query().Get("sort")
+	sortOrder := r.URL.Query().Get("order")
+	if sortField != "" {
+		// whitelist 검증
+		allowed := map[string]bool{
+{{- range .Model.Fields}}
+			"{{.Name}}": true,
+{{- end}}
+		}
+		if allowed[sortField] {
+			if sortOrder != "desc" {
+				sortOrder = "asc"
+			}
+			query = query.Order(sortField + " " + sortOrder)
+		}
+	}
+
 	var total int64
-	h.db.Model(&models.{{.Model.Name}}{}).Count(&total)
-	h.db.Offset(offset).Limit(perPage).Find(&items)
+	query.Count(&total)
+
+	var items []models.{{.Model.Name}}
+	query.Offset(offset).Limit(perPage).Find(&items)
 
 	totalPages := int(total) / perPage
 	if int(total)%perPage > 0 {
@@ -51,6 +90,9 @@ func (h *{{.Model.Name}}Handler) ListPage(w http.ResponseWriter, r *http.Request
 		"TotalPages": totalPages,
 		"Total":      total,
 		"Pages":      pages,
+		"Query":      q,
+		"Sort":       sortField,
+		"Order":      sortOrder,
 	}
 	h.tmpl.ExecuteTemplate(w, "{{.Model.NameSnake}}_list.html", data)
 }

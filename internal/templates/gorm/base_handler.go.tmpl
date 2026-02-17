@@ -1,18 +1,23 @@
 package handlers
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
+
+	"{{.ProjectName}}/models"
+	"gorm.io/gorm"
 )
 
 // BaseHandler handles dashboard base pages
 type BaseHandler struct {
+	db   *gorm.DB
 	tmpl *template.Template
 }
 
 // NewBaseHandler creates a new base handler
-func NewBaseHandler(tmpl *template.Template) *BaseHandler {
-	return &BaseHandler{tmpl: tmpl}
+func NewBaseHandler(db *gorm.DB, tmpl *template.Template) *BaseHandler {
+	return &BaseHandler{db: db, tmpl: tmpl}
 }
 
 func (h *BaseHandler) render(w http.ResponseWriter, name string, data map[string]interface{}) {
@@ -24,13 +29,18 @@ func (h *BaseHandler) render(w http.ResponseWriter, name string, data map[string
 
 // Dashboard renders the main dashboard page
 func (h *BaseHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
+	// 모델별 레코드 수 조회
+{{- range .Models}}
+	var {{.NameLower}}Count int64
+	h.db.Model(&models.{{.Name}}{}).Count(&{{.NameLower}}Count)
+{{- end}}
+
 	data := map[string]interface{}{
 		"PageTitle": "Dashboard",
 		"Stats": []map[string]string{
-			{"Title": "New Users", "Value": "34.7k", "Desc": "↗︎ 2,300 (22%)", "Icon": "users"},
-			{"Title": "Total Sales", "Value": "$34,545", "Desc": "Current month", "Icon": "credit-card"},
-			{"Title": "Pending Leads", "Value": "450", "Desc": "50 in hot leads", "Icon": "stack"},
-			{"Title": "Active Users", "Value": "5.6k", "Desc": "↙ 300 (18%)", "Icon": "user-group"},
+{{- range .Models}}
+			{"Title": "{{.Name}}", "Value": fmt.Sprintf("%d", {{.NameLower}}Count), "Desc": "Total records", "Icon": "stack"},
+{{- end}}
 		},
 		"AmountStats": []map[string]string{
 			{"Title": "Revenue this month", "Value": "$5,600", "Icon": "dollar", "Desc": "↗︎ 2,300 (22%)"},

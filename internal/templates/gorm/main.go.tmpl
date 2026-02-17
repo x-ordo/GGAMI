@@ -73,7 +73,7 @@ func main() {
 	r.Handle("/assets/*", http.FileServer(http.FS(content)))
 
 	// Dashboard base handler
-	baseHandler := handlers.NewBaseHandler(tmpl)
+	baseHandler := handlers.NewBaseHandler(db, tmpl)
 
 	// 메인 페이지 → 대시보드로 리다이렉트
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {

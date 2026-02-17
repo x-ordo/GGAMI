@@ -12,13 +12,29 @@
     </a>
 </div>
 
+<!-- 검색 -->
+<div class="mb-4">
+    <form method="GET" class="flex gap-2">
+        <input type="text" name="q" value="{{.Query}}" placeholder="검색..." class="input input-bordered input-sm w-full max-w-xs" />
+        {{if .Sort}}<input type="hidden" name="sort" value="{{.Sort}}" />{{end}}
+        {{if .Order}}<input type="hidden" name="order" value="{{.Order}}" />{{end}}
+        <button type="submit" class="btn btn-sm btn-ghost">검색</button>
+        {{if .Query}}<a href="?{{if .Sort}}sort={{.Sort}}&order={{.Order}}{{end}}" class="btn btn-sm btn-ghost">초기화</a>{{end}}
+    </form>
+</div>
+
 <div class="card bg-base-100 shadow-sm">
     <div class="overflow-x-auto">
         <table class="table table-zebra">
             <thead>
                 <tr>
 <<- range .Model.Fields>>
-                    <th><<.Name>></th>
+                    <th>
+                        <a href="?sort=<<.Name>>&order={{if and (eq $.Sort "<<.Name>>") (eq $.Order "asc")}}desc{{else}}asc{{end}}{{if $.Query}}&q={{$.Query}}{{end}}" class="flex items-center gap-1 hover:text-primary">
+                            <<.Name>>
+                            {{if eq $.Sort "<<.Name>>"}}{{if eq $.Order "asc"}}▲{{else}}▼{{end}}{{end}}
+                        </a>
+                    </th>
 <<- end>>
                     <th class="w-32">작업</th>
                 </tr>
@@ -48,7 +64,7 @@
 <div class="flex justify-center mt-6">
     <div class="join">
         {{range $i := .Pages}}
-        <a href="?page={{$i}}" class="join-item btn btn-sm {{if eq $i $.Page}}btn-active{{end}}">{{$i}}</a>
+        <a href="?page={{$i}}{{if $.Query}}&q={{$.Query}}{{end}}{{if $.Sort}}&sort={{$.Sort}}&order={{$.Order}}{{end}}" class="join-item btn btn-sm {{if eq $i $.Page}}btn-active{{end}}">{{$i}}</a>
         {{end}}
     </div>
 </div>
